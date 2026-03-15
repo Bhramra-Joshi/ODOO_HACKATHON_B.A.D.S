@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Card</title>
+    <!-- Importing JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #8c6932;
+            /* Darker golden-brown background */
+            --card-bg: #ecece6;
+            /* Off-white card background */
+            --border-color: #111;
+            /* Dark border color */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'JetBrains Mono', monospace;
+            position: relative;
+        }
+
+        /* Continuous black line behind the card */
+        .horizontal-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background-color: #111;
+            transform: translateY(-50%);
+            z-index: 0;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 1;
+            background-color: var(--card-bg);
+            padding: 24px 28px;
+            width: 340px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            /* Fine outer white styling to match image */
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .input-group label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.25rem;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: var(--border-color);
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            height: 42px;
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 1.05rem;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--border-color);
+            outline: none;
+            transition: background-color 0.2s;
+        }
+
+        .input-group input:focus {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .forgot-password-container {
+            text-align: center;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+
+        .forgot-password {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--border-color);
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            text-decoration-thickness: 1.5px;
+            cursor: pointer;
+        }
+
+        .forgot-password:hover {
+            color: #444;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 8px; /* Reduced button sizing */
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            font-size: 1.05rem; /* Reduced font size */
+            font-weight: 600;
+            color: var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s;
+            letter-spacing: 0px;
+            white-space: nowrap; /* Keep in single line */
+        }
+
+        .submit-btn:hover {
+            background-color: var(--border-color);
+            color: var(--card-bg);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="horizontal-line"></div>
+    <div class="login-card">
+        <div class="input-group">
+            <label for="loginId">Login ID:</label>
+            <input type="text" id="loginId" autocomplete="username">
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" autocomplete="current-password">
+        </div>
+
+        <div class="forgot-password-container">
+            <a class="forgot-password">Forgot Password?</a>
+        </div>
+
+        <button class="submit-btn" type="button">Continue to Dashboard</button>
+    </div>
+</body>
+
+</html>

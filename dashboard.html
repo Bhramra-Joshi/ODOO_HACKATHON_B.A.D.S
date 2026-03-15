@@ -1,0 +1,3342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logistics Dashboard v1.2</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        :root {
+            --gold: #8B6F2E;
+            --gold2: #C4952A;
+            --gold3: #D4A843;
+            --dark: #2C2415;
+            --cream: #FAF4E8;
+            --card: #F5EDD8;
+            --muted: #7A6A45;
+            --border: rgba(139, 111, 46, 0.18);
+            --bg: #EDDFBB;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            overflow: hidden
+        }
+
+        .shell {
+            display: flex;
+            height: 100vh;
+            flex-direction: column
+        }
+
+        /* ══ NAV ══ */
+        .topnav {
+            background: var(--cream);
+            border-bottom: 1px solid var(--border);
+            height: 54px;
+            display: flex;
+            align-items: center;
+            padding: 0 28px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 200;
+            border-radius: 0 0 20px 20px;
+            box-shadow: 0 2px 16px rgba(139, 111, 46, 0.08)
+        }
+
+        .nav-center {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .nav-dash-btn {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--muted);
+            padding: 6px 18px;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'DM Sans', sans-serif;
+            border: none;
+            background: rgba(139, 111, 46, 0.07)
+        }
+
+        .nav-dash-btn.on {
+            background: var(--gold);
+            color: #FAF4E8;
+            box-shadow: 0 2px 8px rgba(139, 111, 46, 0.3)
+        }
+
+        .sysmap-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            color: var(--dark);
+            padding: 7px 16px;
+            border-radius: 24px;
+            cursor: pointer;
+            transition: background .25s, color .25s;
+            font-family: 'DM Sans', sans-serif;
+            border: none;
+            background: rgba(44, 36, 21, 0.10)
+        }
+
+        .sysmap-btn.active {
+            background: var(--dark);
+            color: #FAF4E8;
+            border: none
+        }
+
+        .sysmap-btn svg {
+            width: 13px;
+            height: 13px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            position: relative
+        }
+
+        /* ── Diamond-text Profile label ── */
+        .profile-brand {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            cursor: pointer;
+            user-select: none;
+            position: relative
+        }
+
+        .profile-diamond {
+            font-size: 9px;
+            color: var(--gold2);
+            line-height: 1;
+            transition: color .15s
+        }
+
+        .profile-label-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--dark);
+            letter-spacing: .4px;
+            padding: 0 7px;
+            transition: color .15s
+        }
+
+        .profile-brand:hover .profile-diamond {
+            color: var(--gold3)
+        }
+
+        .profile-brand:hover .profile-label-text {
+            color: var(--gold)
+        }
+
+        /* Profile dropdown */
+        .profile-dd {
+            position: absolute;
+            top: 32px;
+            left: 0;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(44, 36, 21, .16);
+            min-width: 180px;
+            z-index: 500;
+            overflow: hidden;
+            display: none;
+            flex-direction: column
+        }
+
+        .profile-dd.open {
+            display: flex
+        }
+
+        .pd-header {
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px
+        }
+
+        .pd-av {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--gold);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #FAF4E8;
+            flex-shrink: 0
+        }
+
+        .pd-nm {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--dark)
+        }
+
+        .pd-role {
+            font-size: 9px;
+            color: var(--muted);
+            margin-top: 1px
+        }
+
+        .pd-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: background .14s;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--dark)
+        }
+
+        .pd-item:hover {
+            background: var(--card)
+        }
+
+        .pd-item svg {
+            width: 13px;
+            height: 13px;
+            stroke: var(--muted);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            flex-shrink: 0
+        }
+
+        .pd-item.logout {
+            color: #C05040;
+            border-top: 1px solid var(--border)
+        }
+
+        .pd-item.logout svg {
+            stroke: #C05040
+        }
+
+        /* ── Bell / Notification ── */
+        .notif-wrap {
+            position: relative
+        }
+
+        .nav-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background .15s
+        }
+
+        .nav-icon:hover {
+            background: var(--cream)
+        }
+
+        .nav-icon svg {
+            width: 15px;
+            height: 15px;
+            stroke: var(--muted);
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+
+        .nav-icon.has-notif {
+            border-color: var(--gold2)
+        }
+
+        .nav-icon.has-notif svg {
+            stroke: var(--gold2)
+        }
+
+        .notif-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--gold2);
+            color: #FAF4E8;
+            font-size: 8px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--cream)
+        }
+
+        /* Notification dropdown */
+        .notif-dd {
+            position: absolute;
+            top: 42px;
+            right: 0;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            box-shadow: 0 8px 28px rgba(44, 36, 21, .16);
+            width: 260px;
+            z-index: 500;
+            overflow: hidden;
+            display: none;
+            flex-direction: column
+        }
+
+        .notif-dd.open {
+            display: flex
+        }
+
+        .nd-header {
+            padding: 12px 16px 10px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .nd-title {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--dark);
+            font-family: 'Playfair Display', serif
+        }
+
+        .nd-clear {
+            font-size: 9px;
+            color: var(--gold2);
+            cursor: pointer;
+            font-weight: 500
+        }
+
+        .nd-clear:hover {
+            text-decoration: underline
+        }
+
+        .nd-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 28px 16px;
+            gap: 8px
+        }
+
+        .nd-empty-icon {
+            font-size: 28px;
+            opacity: .45
+        }
+
+        .nd-empty-text {
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 500;
+            text-align: center
+        }
+
+        .nd-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 10px 16px;
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background .12s
+        }
+
+        .nd-item:last-child {
+            border-bottom: none
+        }
+
+        .nd-item:hover {
+            background: var(--card)
+        }
+
+        .nd-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--gold2);
+            flex-shrink: 0;
+            margin-top: 3px
+        }
+
+        .nd-dot.read {
+            background: var(--border)
+        }
+
+        .nd-info {
+            flex: 1
+        }
+
+        .nd-msg {
+            font-size: 10px;
+            font-weight: 500;
+            color: var(--dark);
+            line-height: 1.4
+        }
+
+        .nd-time {
+            font-size: 8.5px;
+            color: var(--muted);
+            margin-top: 2px
+        }
+
+        /* ══ DASHBOARD VIEW ══ */
+        #dashboard-view {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            background: var(--bg)
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #C4952A 0%, #D4A843 45%, #B8924E 100%);
+            border-radius: 20px;
+            height: 110px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: visible;
+            flex-shrink: 0
+        }
+
+        .hero-left {
+            width: 190px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 0 24px;
+            z-index: 2
+        }
+
+        .hn-label {
+            font-size: 9px;
+            color: rgba(255, 255, 255, .6);
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            margin-bottom: 4px
+        }
+
+        .hn-num {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .35);
+            line-height: 1
+        }
+
+        .hn-action {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+            cursor: pointer;
+            opacity: .8
+        }
+
+        .hn-action svg {
+            width: 16px;
+            height: 16px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+
+        .hn-action span {
+            font-size: 10px;
+            color: #fff;
+            font-weight: 500
+        }
+
+        .hero-center-wrap {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            position: relative;
+            z-index: 3
+        }
+
+        .hero-bubble {
+            width: 176px;
+            background: linear-gradient(180deg, #D4A843 0%, #C4952A 100%);
+            border-radius: 0 0 88px 88px/0 0 58px 58px;
+            border: 3px solid rgba(255, 255, 255, 0.22);
+            border-top: none;
+            position: relative;
+            top: -28px;
+            padding: 16px 16px 24px;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(139, 111, 46, 0.28);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1px
+        }
+
+        .hero-bubble::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            height: 32px;
+            background: var(--bg);
+            border-radius: 0 0 50% 50%/0 0 28px 28px;
+            z-index: 1
+        }
+
+        .hero-bubble .bicon {
+            font-size: 20px;
+            position: relative;
+            z-index: 2
+        }
+
+        .hero-bubble .blabel {
+            font-size: 8.5px;
+            color: rgba(255, 255, 255, .7);
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 2;
+            margin-top: 3px
+        }
+
+        .hero-bubble .bval {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #fff;
+            position: relative;
+            z-index: 2;
+            line-height: 1
+        }
+
+        .hero-bubble .bsub {
+            font-size: 8.5px;
+            color: rgba(255, 255, 255, .65);
+            position: relative;
+            z-index: 2;
+            margin-top: 2px
+        }
+
+        .hero-right {
+            width: 190px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 0 24px;
+            z-index: 2
+        }
+
+        .hn-num-right {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            font-weight: 700;
+            color: rgba(255, 255, 255, .35);
+            line-height: 1;
+            text-align: right
+        }
+
+        .hn-action-right {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+            cursor: pointer;
+            opacity: .8;
+            justify-content: flex-end
+        }
+
+        .hn-action-right svg {
+            width: 16px;
+            height: 16px;
+            stroke: #fff;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+
+        .hn-action-right span {
+            font-size: 10px;
+            color: #fff;
+            font-weight: 500
+        }
+
+        .page-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: -4px;
+            flex-shrink: 0
+        }
+
+        .pdot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(139, 111, 46, .25);
+            transition: all .25s;
+            cursor: pointer
+        }
+
+        .pdot.on {
+            background: var(--gold);
+            width: 18px;
+            border-radius: 3px
+        }
+
+        .tiles-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 14px;
+            flex-shrink: 0
+        }
+
+        .tile {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 9px
+        }
+
+        .tile-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .tile-title {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--muted)
+        }
+
+        .stock-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px
+        }
+
+        .stock-card {
+            background: var(--cream);
+            border-radius: 11px;
+            border: 1px solid var(--border);
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px
+        }
+
+        .sc-label {
+            font-size: 8px;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase
+        }
+
+        .sc-val {
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            font-weight: 700;
+            line-height: 1
+        }
+
+        .sc-sub {
+            font-size: 8px;
+            font-weight: 500;
+            margin-top: 1px
+        }
+
+        .sc-bar {
+            height: 4px;
+            border-radius: 4px;
+            margin-top: 6px;
+            background: rgba(139, 111, 46, .12);
+            overflow: hidden
+        }
+
+        .sc-bar-fill {
+            height: 100%;
+            border-radius: 4px
+        }
+
+        .reorder-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        .ri {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--cream);
+            border-radius: 8px;
+            padding: 7px 10px;
+            border: 1px solid var(--border)
+        }
+
+        .ri-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0
+        }
+
+        .ri-name {
+            font-size: 9px;
+            font-weight: 500;
+            color: var(--dark);
+            flex: 1
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 8px
+        }
+
+        .filter-group:last-of-type {
+            margin-bottom: 0
+        }
+
+        .flabel {
+            font-size: 8px;
+            color: var(--muted);
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 3px
+        }
+
+        .chip {
+            font-size: 8.5px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--cream);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all .15s;
+            font-family: 'DM Sans', sans-serif;
+            line-height: 1.5
+        }
+
+        .chip:hover {
+            background: rgba(139, 111, 46, .1)
+        }
+
+        .chip.on {
+            background: var(--gold);
+            color: #FAF4E8;
+            border-color: var(--gold);
+            font-weight: 500
+        }
+
+        .active-summary {
+            font-size: 8px;
+            color: var(--gold2);
+            background: rgba(196, 149, 42, .1);
+            border-radius: 6px;
+            padding: 4px 8px;
+            line-height: 1.5
+        }
+
+        .pend-section {
+            display: flex;
+            flex-direction: column;
+            gap: 7px
+        }
+
+        .pend-header {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .pend-big {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1
+        }
+
+        .pend-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--cream);
+            border-radius: 8px;
+            padding: 6px 10px;
+            border: 1px solid var(--border)
+        }
+
+        .pend-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0
+        }
+
+        .pend-icon svg {
+            width: 12px;
+            height: 12px;
+            fill: none;
+            stroke-width: 1.5;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+
+        .pend-info {
+            flex: 1
+        }
+
+        .pend-name {
+            font-size: 9px;
+            font-weight: 500;
+            color: var(--dark)
+        }
+
+        .pend-date {
+            font-size: 8px;
+            color: var(--muted)
+        }
+
+        .pend-status {
+            font-size: 8px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            flex-shrink: 0
+        }
+
+        .status-wait {
+            background: rgba(196, 149, 42, .12);
+            color: var(--gold2)
+        }
+
+        .status-ready {
+            background: rgba(107, 143, 74, .12);
+            color: #6B8F4A
+        }
+
+        .status-draft {
+            background: rgba(139, 111, 46, .1);
+            color: var(--muted)
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 4px 0
+        }
+
+        .tile-full {
+            background: var(--card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 16px 20px;
+            flex-shrink: 0
+        }
+
+        .tf-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px
+        }
+
+        .tf-title {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .8px;
+            text-transform: uppercase;
+            color: var(--muted)
+        }
+
+        .tf-prog-track {
+            height: 5px;
+            background: rgba(139, 111, 46, .12);
+            border-radius: 4px;
+            overflow: hidden;
+            width: 120px
+        }
+
+        .tf-prog-fill {
+            height: 100%;
+            background: var(--gold2);
+            border-radius: 4px
+        }
+
+        .transfers-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px
+        }
+
+        .tr-card {
+            background: var(--cream);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 9px 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px
+        }
+
+        .tr-id {
+            font-size: 8px;
+            color: var(--muted);
+            font-weight: 600
+        }
+
+        .tr-route {
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--dark);
+            line-height: 1.3
+        }
+
+        .tr-qty {
+            font-size: 8px;
+            color: var(--muted)
+        }
+
+        .tr-status {
+            font-size: 7.5px;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 8px;
+            margin-top: 3px;
+            display: inline-block
+        }
+
+        .ts-done {
+            background: rgba(107, 143, 74, .12);
+            color: #6B8F4A
+        }
+
+        .ts-transit {
+            background: rgba(196, 149, 42, .12);
+            color: var(--gold2)
+        }
+
+        .ts-pending {
+            background: rgba(139, 111, 46, .08);
+            color: var(--muted)
+        }
+
+        /* ══ MODALS ══ */
+        .modal-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            background: rgba(44, 36, 21, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .22s;
+            backdrop-filter: blur(3px)
+        }
+
+        .modal-backdrop.open {
+            opacity: 1;
+            pointer-events: all
+        }
+
+        .modal {
+            background: var(--cream);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 60px rgba(44, 36, 21, 0.22);
+            width: min(640px, 94vw);
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(12px);
+            transition: transform .22s
+        }
+
+        .modal-backdrop.open .modal {
+            transform: translateY(0)
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 22px 14px;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px
+        }
+
+        .modal-title span {
+            font-size: 20px
+        }
+
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: var(--muted);
+            transition: all .14s
+        }
+
+        .modal-close:hover {
+            background: var(--bg);
+            color: var(--dark)
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            padding: 18px 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1
+        }
+
+        .modal-footer {
+            padding: 14px 22px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            flex-shrink: 0
+        }
+
+        /* form elements */
+        .frow {
+            display: flex;
+            flex-direction: column;
+            gap: 5px
+        }
+
+        .frow2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px
+        }
+
+        .frow3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px
+        }
+
+        .flbl {
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            color: var(--muted)
+        }
+
+        .finput {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 12px;
+            color: var(--dark);
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            padding: 8px 11px;
+            outline: none;
+            transition: border .15s;
+            width: 100%
+        }
+
+        .finput:focus {
+            border-color: var(--gold2)
+        }
+
+        .finput::placeholder {
+            color: rgba(122, 106, 69, .45)
+        }
+
+        select.finput {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9' stroke='%238B6F2E' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 14px;
+            padding-right: 28px;
+            cursor: pointer
+        }
+
+        .btn-primary {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            background: var(--gold);
+            color: #FAF4E8;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: background .15s
+        }
+
+        .btn-primary:hover {
+            background: var(--gold2)
+        }
+
+        .btn-secondary {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 500;
+            background: var(--card);
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all .15s
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg)
+        }
+
+        .btn-success {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            background: #5A8A4A;
+            color: #FAF4E8;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            cursor: pointer;
+            transition: background .15s
+        }
+
+        .btn-success:hover {
+            background: #4A7A3A
+        }
+
+        /* table inside modal */
+        .mtable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px
+        }
+
+        .mtable th {
+            font-size: 8px;
+            font-weight: 600;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            padding: 6px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border)
+        }
+
+        .mtable td {
+            padding: 7px 10px;
+            border-bottom: 1px solid rgba(139, 111, 46, 0.08);
+            color: var(--dark);
+            font-weight: 500;
+            vertical-align: middle
+        }
+
+        .mtable tr:last-child td {
+            border-bottom: none
+        }
+
+        .mtable tr:hover td {
+            background: rgba(139, 111, 46, 0.04)
+        }
+
+        /* step indicator */
+        .steps {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 4px
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            font-weight: 600;
+            color: var(--muted)
+        }
+
+        .step.active {
+            color: var(--gold2)
+        }
+
+        .step.done {
+            color: #5A8A4A
+        }
+
+        .step-num {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid currentColor;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: 700;
+            flex-shrink: 0
+        }
+
+        .step.done .step-num {
+            background: #5A8A4A;
+            border-color: #5A8A4A;
+            color: #fff
+        }
+
+        .step.active .step-num {
+            background: var(--gold2);
+            border-color: var(--gold2);
+            color: #fff
+        }
+
+        .step-line {
+            flex: 1;
+            height: 2px;
+            background: var(--border);
+            margin: 0 6px
+        }
+
+        .step-line.done {
+            background: #5A8A4A
+        }
+
+        /* status badge */
+        .sbadge {
+            font-size: 8px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block
+        }
+
+        .sbadge.draft {
+            background: rgba(139, 111, 46, .1);
+            color: var(--muted)
+        }
+
+        .sbadge.ready {
+            background: rgba(90, 138, 74, .12);
+            color: #5A8A4A
+        }
+
+        .sbadge.validated {
+            background: rgba(90, 138, 74, .2);
+            color: #3A6A2A
+        }
+
+        .sbadge.pending {
+            background: rgba(196, 149, 42, .12);
+            color: var(--gold2)
+        }
+
+        /* product row in receipt/delivery add-items */
+        .pitem-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--card);
+            border-radius: 9px;
+            padding: 8px 10px;
+            border: 1px solid var(--border)
+        }
+
+        .pitem-name {
+            flex: 1;
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--dark)
+        }
+
+        .pitem-qty {
+            width: 70px
+        }
+
+        .pitem-remove {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            background: rgba(192, 80, 64, .1);
+            border: none;
+            cursor: pointer;
+            color: #C05040;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        /* open-feature buttons on dashboard tiles */
+        .feat-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 9px;
+            font-weight: 600;
+            color: var(--gold2);
+            background: rgba(196, 149, 42, .08);
+            border: 1px solid rgba(196, 149, 42, .2);
+            border-radius: 12px;
+            padding: 4px 10px;
+            cursor: pointer;
+            transition: all .15s;
+            font-family: 'DM Sans', sans-serif;
+            white-space: nowrap
+        }
+
+        .feat-btn:hover {
+            background: rgba(196, 149, 42, .16)
+        }
+
+        #map-view {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: none;
+            background: var(--bg)
+        }
+
+        #map-view::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 44px, rgba(139, 111, 46, 0.09) 44px, rgba(139, 111, 46, 0.09) 45px), repeating-linear-gradient(90deg, transparent, transparent 44px, rgba(139, 111, 46, 0.09) 44px, rgba(139, 111, 46, 0.09) 45px);
+            pointer-events: none;
+            z-index: 0
+        }
+
+        #map-stage {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            overflow: hidden
+        }
+
+        #map-inner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
+            will-change: transform;
+            cursor: grab
+        }
+
+        #map-inner:active {
+            cursor: grabbing
+        }
+
+        #map-svg {
+            display: block;
+            overflow: visible
+        }
+
+        .map-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            gap: 6px
+        }
+
+        .map-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 700;
+            box-shadow: 0 2px 8px rgba(44, 36, 21, .1);
+            transition: all .15s;
+            color: var(--dark);
+            user-select: none
+        }
+
+        .map-btn:hover {
+            background: var(--card);
+            transform: scale(1.08)
+        }
+
+        .map-back {
+            position: absolute;
+            top: 14px;
+            left: 14px;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--cream);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 7px 16px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--dark);
+            box-shadow: 0 2px 10px rgba(44, 36, 21, .1);
+            transition: all .2s
+        }
+
+        .map-back:hover {
+            background: var(--card)
+        }
+
+        .map-back svg {
+            width: 14px;
+            height: 14px;
+            stroke: var(--dark);
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round
+        }
+
+        .map-hint {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: var(--muted);
+            background: rgba(250, 244, 232, .9);
+            padding: 5px 16px;
+            border-radius: 20px;
+            z-index: 20;
+            backdrop-filter: blur(4px);
+            white-space: nowrap;
+            pointer-events: none;
+            border: 1px solid var(--border)
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            background: var(--bg);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .35s
+        }
+
+        #overlay.show {
+            opacity: 1;
+            pointer-events: all
+        }
+
+        .footer {
+            height: 26px;
+            background: var(--cream);
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            flex-shrink: 0;
+            z-index: 50
+        }
+
+        .footer span {
+            font-size: 8.5px;
+            color: #A89060;
+            letter-spacing: .5px
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(139, 111, 46, .2);
+            border-radius: 4px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="shell">
+        <div id="overlay"></div>
+
+        <!-- NAV -->
+        <div class="topnav">
+
+            <!-- Diamond-text Profile label with dropdown — label always says "Profile" -->
+            <div class="profile-brand" id="profile-brand" onclick="toggleProfileDD(event)">
+                <span class="profile-diamond">◆</span>
+                <span class="profile-label-text" id="profile-nav-label">Profile</span>
+                <span class="profile-diamond">◆</span>
+                <div class="profile-dd" id="profile-dd">
+                    <div class="pd-header">
+                        <div class="pd-av" id="pd-av-initials">WM</div>
+                        <div>
+                            <div class="pd-nm" id="pd-username">User</div>
+                        </div>
+                    </div>
+                    <div class="pd-item">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        My Profile
+                    </div>
+                    <div class="pd-item logout">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        Logout
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center tabs -->
+            <div class="nav-center">
+                <button class="nav-dash-btn on" id="dash-btn" onclick="showDashboard()">Dashboard</button>
+                <button class="sysmap-btn" id="sysmap-btn" onclick="showSystemMap()">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="4" cy="6" r="2" />
+                        <circle cx="20" cy="6" r="2" />
+                        <circle cx="4" cy="18" r="2" />
+                        <circle cx="20" cy="18" r="2" />
+                        <line x1="6" y1="6" x2="10" y2="11" />
+                        <line x1="18" y1="6" x2="14" y2="11" />
+                        <line x1="6" y1="18" x2="10" y2="13" />
+                        <line x1="18" y1="18" x2="14" y2="13" />
+                    </svg>
+                    <span>SYSTEM MAP</span>
+                </button>
+            </div>
+
+            <!-- Right: Bell only -->
+            <div class="nav-right">
+                <div class="notif-wrap">
+                    <div class="nav-icon" id="bell-btn" onclick="toggleNotif(event)">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                            <path d="M13.73 21a2 2 0 01-3.46 0" />
+                        </svg>
+                    </div>
+                    <!-- badge shown when notifications exist -->
+                    <div class="notif-badge" id="notif-badge" style="display:none">0</div>
+                    <!-- Notification dropdown -->
+                    <div class="notif-dd" id="notif-dd">
+                        <div class="nd-header">
+                            <span class="nd-title">Notifications</span>
+                            <span class="nd-clear" id="nd-clear-btn" onclick="clearNotifs()" style="display:none">Clear
+                                all</span>
+                        </div>
+                        <div id="nd-body">
+                            <!-- populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboard-view">
+            <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0">
+                <div class="hero">
+                    <div class="hero-left">
+                        <div class="hn-label">Previous</div>
+                        <div class="hn-num" id="prev-num">03</div>
+                        <div class="hn-action" onclick="prevPage()"><svg viewBox="0 0 24 24">
+                                <polyline points="15 18 9 12 15 6" />
+                            </svg><span>Swipe Back</span></div>
+                    </div>
+                    <div class="hero-center-wrap">
+                        <div class="hero-bubble">
+                            <span class="bicon">📦</span>
+                            <div class="blabel">Total Products</div>
+                            <div class="bval" id="bubble-val">4,821</div>
+                            <div class="bsub" id="bubble-sub">items in stock</div>
+                        </div>
+                    </div>
+                    <div class="hero-right">
+                        <div class="hn-label"
+                            style="text-align:right;font-size:9px;color:rgba(255,255,255,.6);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px">
+                            Next</div>
+                        <div class="hn-num-right" id="next-num">02</div>
+                        <div class="hn-action-right" onclick="nextPage()"><span>Swipe Forward</span><svg
+                                viewBox="0 0 24 24">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg></div>
+                    </div>
+                </div>
+                <div class="page-dots" id="page-dots"></div>
+            </div>
+
+            <div class="tiles-row">
+                <div class="tile">
+                    <div class="tile-head"><span class="tile-title">Low / Out of Stock</span>
+                        <div style="display:flex;gap:6px;align-items:center"><button class="feat-btn"
+                                onclick="openModal('modal-adjustment')">⚖️ Adjust</button><span
+                                style="font-size:11px">⚠️</span></div>
+                    </div>
+                    <div class="stock-grid">
+                        <div class="stock-card">
+                            <div class="sc-label">Low Stock</div>
+                            <div class="sc-val" style="color:var(--gold2)">94</div>
+                            <div class="sc-sub" style="color:var(--gold2)">↓ Below threshold</div>
+                            <div class="sc-bar">
+                                <div class="sc-bar-fill" style="width:68%;background:var(--gold2)"></div>
+                            </div>
+                        </div>
+                        <div class="stock-card">
+                            <div class="sc-label">Out of Stock</div>
+                            <div class="sc-val" style="color:#C05040">44</div>
+                            <div class="sc-sub" style="color:#C05040">⚠ Zero units</div>
+                            <div class="sc-bar">
+                                <div class="sc-bar-fill" style="width:32%;background:#C05040"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div
+                        style="font-size:8px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">
+                        Immediate Reorder</div>
+                    <div class="reorder-list">
+                        <div class="ri">
+                            <div class="ri-dot" style="background:#C05040"></div>
+                            <div class="ri-name">Wireless Earbuds Pro</div>
+                            <div style="font-size:8.5px;font-weight:600;color:#C05040">0 units</div>
+                        </div>
+                        <div class="ri">
+                            <div class="ri-dot" style="background:#C05040"></div>
+                            <div class="ri-name">LED Bulb 9W Pack</div>
+                            <div style="font-size:8.5px;font-weight:600;color:#C05040">0 units</div>
+                        </div>
+                        <div class="ri">
+                            <div class="ri-dot" style="background:var(--gold2)"></div>
+                            <div class="ri-name">Cotton T-Shirt XL</div>
+                            <div style="font-size:8.5px;font-weight:600;color:var(--gold2)">12 units</div>
+                        </div>
+                        <div class="ri">
+                            <div class="ri-dot" style="background:var(--gold2)"></div>
+                            <div class="ri-name">Energy Drink 330ml</div>
+                            <div style="font-size:8.5px;font-weight:600;color:var(--gold2)">8 units</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tile">
+                    <div class="tile-head"><span class="tile-title">Dynamic Filters</span><span
+                            style="font-size:11px;color:var(--gold2)">⚙</span></div>
+                    <div class="filter-group">
+                        <div class="flabel">Document Type</div>
+                        <div class="chips" id="type-chips"><span class="chip on"
+                                onclick="setFilter('type',this,'Receipts')">Receipts</span><span class="chip"
+                                onclick="setFilter('type',this,'Delivery')">Delivery</span><span class="chip"
+                                onclick="setFilter('type',this,'Internal')">Internal</span><span class="chip"
+                                onclick="setFilter('type',this,'Adjustments')">Adj.</span></div>
+                    </div>
+                    <div class="filter-group">
+                        <div class="flabel">Status</div>
+                        <div class="chips" id="status-chips"><span class="chip on"
+                                onclick="setFilter('status',this,'Draft')">Draft</span><span class="chip"
+                                onclick="setFilter('status',this,'Waiting')">Waiting</span><span class="chip"
+                                onclick="setFilter('status',this,'Ready')">Ready</span><span class="chip"
+                                onclick="setFilter('status',this,'Done')">Done</span><span class="chip"
+                                onclick="setFilter('status',this,'Canceled')">Canceled</span></div>
+                    </div>
+                    <div class="filter-group">
+                        <div class="flabel">Warehouse</div>
+                        <div class="chips" id="wh-chips"><span class="chip on"
+                                onclick="setFilter('wh',this,'All')">All</span><span class="chip"
+                                onclick="setFilter('wh',this,'WH-01')">WH-01</span><span class="chip"
+                                onclick="setFilter('wh',this,'WH-02')">WH-02</span><span class="chip"
+                                onclick="setFilter('wh',this,'Zone-A')">Zone-A</span></div>
+                    </div>
+                    <div class="filter-group">
+                        <div class="flabel">Category</div>
+                        <div class="chips" id="cat-chips"><span class="chip on"
+                                onclick="setFilter('cat',this,'All')">All</span><span class="chip"
+                                onclick="setFilter('cat',this,'Electronics')">Electronics</span><span class="chip"
+                                onclick="setFilter('cat',this,'Apparel')">Apparel</span><span class="chip"
+                                onclick="setFilter('cat',this,'FMCG')">FMCG</span></div>
+                    </div>
+                    <div class="active-summary" id="active-summary">Receipts · Draft · All · All Categories</div>
+                </div>
+                <div class="tile">
+                    <div class="tile-head"><span class="tile-title">Pending Operations</span>
+                        <div style="display:flex;gap:5px"><button class="feat-btn"
+                                onclick="openModal('modal-receipts')">📥 Receipt</button><button class="feat-btn"
+                                onclick="openModal('modal-delivery')">🚚 Delivery</button></div>
+                    </div>
+                    <div class="pend-section">
+                        <div class="pend-header"><span>🚚 Deliveries</span>
+                            <div class="pend-big">34</div>
+                        </div>
+                        <div class="pend-row">
+                            <div class="pend-icon" style="background:rgba(107,143,74,.12)"><svg viewBox="0 0 24 24"
+                                    style="stroke:#6B8F4A">
+                                    <rect x="1" y="3" width="15" height="13" />
+                                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                                    <circle cx="5.5" cy="18.5" r="2.5" />
+                                    <circle cx="18.5" cy="18.5" r="2.5" />
+                                </svg></div>
+                            <div class="pend-info">
+                                <div class="pend-name">DEL-2041 · WH-01→Client A</div>
+                                <div class="pend-date">Due: 14 Mar · 240 units</div>
+                            </div><span class="pend-status status-ready">Ready</span>
+                        </div>
+                        <div class="pend-row">
+                            <div class="pend-icon" style="background:rgba(196,149,42,.12)"><svg viewBox="0 0 24 24"
+                                    style="stroke:var(--gold2)">
+                                    <rect x="1" y="3" width="15" height="13" />
+                                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
+                                    <circle cx="5.5" cy="18.5" r="2.5" />
+                                    <circle cx="18.5" cy="18.5" r="2.5" />
+                                </svg></div>
+                            <div class="pend-info">
+                                <div class="pend-name">DEL-2038 · WH-02→Client B</div>
+                                <div class="pend-date">Due: 15 Mar · 85 units</div>
+                            </div><span class="pend-status status-wait">Waiting</span>
+                        </div>
+                    </div>
+                    <hr class="divider">
+                    <div class="pend-section">
+                        <div class="pend-header"><span>📥 Receipts</span>
+                            <div class="pend-big">57</div>
+                        </div>
+                        <div class="pend-row">
+                            <div class="pend-icon" style="background:rgba(139,111,46,.12)"><svg viewBox="0 0 24 24"
+                                    style="stroke:var(--gold)">
+                                    <polyline points="6 9 6 2 18 2 18 9" />
+                                    <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+                                    <rect x="6" y="14" width="12" height="8" />
+                                </svg></div>
+                            <div class="pend-info">
+                                <div class="pend-name">REC-1192 · Supplier X→WH-01</div>
+                                <div class="pend-date">ETA: 14 Mar · 500 units</div>
+                            </div><span class="pend-status status-wait">Waiting</span>
+                        </div>
+                        <div class="pend-row">
+                            <div class="pend-icon" style="background:rgba(139,111,46,.08)"><svg viewBox="0 0 24 24"
+                                    style="stroke:var(--muted)">
+                                    <polyline points="6 9 6 2 18 2 18 9" />
+                                    <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+                                    <rect x="6" y="14" width="12" height="8" />
+                                </svg></div>
+                            <div class="pend-info">
+                                <div class="pend-name">REC-1188 · Supplier Y→WH-02</div>
+                                <div class="pend-date">ETA: 16 Mar · 320 units</div>
+                            </div><span class="pend-status status-draft">Draft</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tile-full">
+                <div class="tf-head">
+                    <span class="tf-title">🔄 Internal Transfer Schedule</span>
+                    <div style="display:flex;align-items:center;gap:8px"><button class="feat-btn"
+                            onclick="openModal('modal-transfer')">+ New Transfer</button><button class="feat-btn"
+                            onclick="openModal('modal-products')">📦 Products</button></div>
+                    <div style="display:flex;align-items:center;gap:10px"><span
+                            style="font-size:9px;color:var(--gold2);font-weight:500">14/22 completed</span>
+                        <div class="tf-prog-track">
+                            <div class="tf-prog-fill" style="width:64%"></div>
+                        </div>
+                    </div>
+                    <a style="font-size:9px;color:var(--gold2);cursor:pointer;margin-left:16px">View all →</a>
+                </div>
+                <div class="transfers-grid" id="transfers-grid"></div>
+            </div>
+        </div>
+
+        <!-- SYSTEM MAP -->
+        <div id="map-view">
+            <div class="map-back" onclick="showDashboard()">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="15 18 9 12 15 6" />
+                </svg>
+                Back to Dashboard
+            </div>
+            <div class="map-controls">
+                <div class="map-btn" onclick="zoomMap(1.2)">+</div>
+                <div class="map-btn" onclick="zoomMap(1/1.2)">−</div>
+                <div class="map-btn" onclick="resetZoom()" style="font-size:14px">⌂</div>
+            </div>
+            <div class="map-hint">Click a branch to expand · Scroll to zoom · Drag to pan</div>
+            <div id="map-stage">
+                <div id="map-inner">
+                    <svg id="map-svg"></svg>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer"><span>DASHBOARD v1.2</span><span style="flex:1"></span><span>© 2024 LOGISTICS CORP</span>
+        </div>
+
+        <!-- ══ MODAL 1: CREATE/UPDATE PRODUCTS ══ -->
+        <div class="modal-backdrop" id="modal-products">
+            <div class="modal" style="width:min(700px,95vw)">
+                <div class="modal-header">
+                    <div class="modal-title"><span>✏️</span>Create / Update Products</div>
+                    <div class="modal-close" onclick="closeModal('modal-products')">✕</div>
+                </div>
+                <div class="modal-body">
+                    <!-- Edit banner -->
+                    <div id="pm-edit-banner"
+                        style="display:none;background:rgba(196,149,42,.1);border:1px solid rgba(196,149,42,.3);border-radius:10px;padding:8px 14px;font-size:10px;color:var(--gold2);font-weight:500;display:none;align-items:center;justify-content:space-between">
+                        <span>✏️ Editing: <strong id="pm-edit-name"></strong></span>
+                        <button class="btn-secondary" style="padding:3px 10px;font-size:9px"
+                            onclick="cancelProductEdit()">✕ Cancel Edit</button>
+                    </div>
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Product Name *</label><input class="finput" id="pm-name"
+                                placeholder="e.g. Steel Rods 10mm"></div>
+                        <div class="frow"><label class="flbl">SKU / Code *</label><input class="finput" id="pm-sku"
+                                placeholder="e.g. STL-ROD-10"></div>
+                    </div>
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Category</label>
+                            <select class="finput" id="pm-cat">
+                                <option value="">Select category</option>
+                                <option>Electronics</option>
+                                <option>Apparel</option>
+                                <option>FMCG</option>
+                                <option>Raw Materials</option>
+                                <option>Machinery</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="frow"><label class="flbl">Unit of Measure</label>
+                            <select class="finput" id="pm-uom">
+                                <option value="">Select unit</option>
+                                <option>Units</option>
+                                <option>Kg</option>
+                                <option>Litres</option>
+                                <option>Metres</option>
+                                <option>Boxes</option>
+                                <option>Pieces</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Per Unit Cost (₹)</label><input class="finput"
+                                id="pm-cost" type="number" min="0" placeholder="0.00"></div>
+                        <div class="frow"><label class="flbl">Initial Stock (On Hand)</label><input class="finput"
+                                id="pm-stock" type="number" min="0" placeholder="0"></div>
+                    </div>
+                    <div style="border-top:1px solid var(--border);padding-top:12px">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                            <div
+                                style="font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted)">
+                                All Products</div>
+                            <input class="finput" id="pm-search" placeholder="🔍 Search..."
+                                style="width:150px;font-size:10px;padding:4px 10px" oninput="renderProductList()">
+                        </div>
+                        <div id="pm-list" style="max-height:180px;overflow-y:auto"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('modal-products')">Close</button>
+                    <button class="btn-primary" id="pm-save-btn" onclick="saveProduct()">+ Add Product</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL 2: STOCK PER LOCATION ══ -->
+        <div class="modal-backdrop" id="modal-stock-location">
+            <div class="modal" style="width:min(760px,96vw)">
+                <div class="modal-header">
+                    <div class="modal-title"><span>📍</span>Stock per Location</div>
+                    <div style="display:flex;gap:8px;align-items:center">
+                        <select class="finput" id="sl-loc-filter" style="font-size:10px;padding:4px 10px;width:130px"
+                            onchange="renderStockLocation()">
+                            <option value="">All Locations</option>
+                            <option>WH-01</option>
+                            <option>WH-02</option>
+                            <option>Zone-A</option>
+                            <option>Rack A</option>
+                            <option>Rack B</option>
+                        </select>
+                        <input class="finput" id="sl-search" placeholder="🔍 Search product..."
+                            style="width:150px;font-size:10px;padding:4px 10px" oninput="renderStockLocation()">
+                        <div class="modal-close" onclick="closeModal('modal-stock-location')">✕</div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:12px 18px">
+                    <div id="sl-table"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL 3: PRODUCT CATEGORIES ══ -->
+        <div class="modal-backdrop" id="modal-categories">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title"><span>🗂️</span>Product Categories</div>
+                    <div class="modal-close" onclick="closeModal('modal-categories')">✕</div>
+                </div>
+                <div class="modal-body">
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Category Name *</label><input class="finput" id="cat-name"
+                                placeholder="e.g. Raw Materials"></div>
+                        <div class="frow"><label class="flbl">Parent Category</label>
+                            <select class="finput" id="cat-parent">
+                                <option value="">None (Top Level)</option>
+                                <option>All</option>
+                                <option>Consumable</option>
+                                <option>Storable</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="frow"><label class="flbl">Description</label><input class="finput" id="cat-desc"
+                            placeholder="Optional description"></div>
+                    <div style="border-top:1px solid var(--border);padding-top:12px">
+                        <div
+                            style="font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">
+                            Existing Categories</div>
+                        <div id="cat-list" style="max-height:200px;overflow-y:auto"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('modal-categories')">Close</button>
+                    <button class="btn-primary" onclick="saveCategory()">+ Add Category</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL 4: REORDERING RULES ══ -->
+        <div class="modal-backdrop" id="modal-reorder">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title"><span>🔁</span>Reordering Rules</div>
+                    <div class="modal-close" onclick="closeModal('modal-reorder')">✕</div>
+                </div>
+                <div class="modal-body">
+                    <div
+                        style="background:rgba(196,149,42,.08);border:1px solid rgba(196,149,42,.2);border-radius:10px;padding:9px 13px;font-size:10px;color:var(--gold2);font-weight:500;margin-bottom:2px">
+                        System will alert when stock falls below minimum quantity.
+                    </div>
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Product *</label><select class="finput"
+                                id="rr-prod"></select></div>
+                        <div class="frow"><label class="flbl">Location</label>
+                            <select class="finput" id="rr-loc">
+                                <option>WH-01</option>
+                                <option>WH-02</option>
+                                <option>Zone-A</option>
+                                <option>Rack A</option>
+                                <option>Rack B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="frow3">
+                        <div class="frow"><label class="flbl">Min Qty *</label><input class="finput" id="rr-min"
+                                type="number" min="0" placeholder="e.g. 10"></div>
+                        <div class="frow"><label class="flbl">Max Qty</label><input class="finput" id="rr-max"
+                                type="number" min="0" placeholder="e.g. 100"></div>
+                        <div class="frow"><label class="flbl">Reorder Qty</label><input class="finput" id="rr-qty"
+                                type="number" min="1" placeholder="e.g. 50"></div>
+                    </div>
+                    <div style="border-top:1px solid var(--border);padding-top:12px">
+                        <div
+                            style="font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">
+                            Active Rules</div>
+                        <div id="rr-list" style="max-height:200px;overflow-y:auto"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('modal-reorder')">Close</button>
+                    <button class="btn-primary" onclick="saveReorderRule()">+ Add Rule</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL: RECEIPTS ══ -->
+        <div class="modal-backdrop" id="modal-receipts">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title"><span>📥</span>New Receipt — Incoming Goods</div>
+                    <div class="modal-close" onclick="closeModal('modal-receipts')">✕</div>
+                </div>
+                <div class="modal-body">
+                    <div class="steps" id="rec-steps">
+                        <div class="step active" id="rec-s1">
+                            <div class="step-num">1</div><span>Details</span>
+                        </div>
+                        <div class="step-line" id="rec-l1"></div>
+                        <div class="step" id="rec-s2">
+                            <div class="step-num">2</div><span>Add Items</span>
+                        </div>
+                        <div class="step-line" id="rec-l2"></div>
+                        <div class="step" id="rec-s3">
+                            <div class="step-num">3</div><span>Validate</span>
+                        </div>
+                    </div>
+                    <!-- Step 1 -->
+                    <div id="rec-step1">
+                        <div class="frow2">
+                            <div class="frow"><label class="flbl">Supplier Name *</label><input class="finput"
+                                    id="rec-supplier" placeholder="e.g. Supplier Co. Ltd"></div>
+                            <div class="frow"><label class="flbl">Destination Warehouse</label>
+                                <select class="finput" id="rec-wh">
+                                    <option>WH-01</option>
+                                    <option>WH-02</option>
+                                    <option>Zone-A</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="frow"><label class="flbl">Expected Arrival Date</label><input class="finput"
+                                type="date" id="rec-date"></div>
+                    </div>
+                    <!-- Step 2 -->
+                    <div id="rec-step2" style="display:none">
+                        <div style="display:flex;gap:8px;margin-bottom:10px">
+                            <select class="finput" id="rec-prod-sel" style="flex:1"></select>
+                            <input class="finput pitem-qty" id="rec-qty" type="number" min="1" placeholder="Qty"
+                                style="width:80px">
+                            <button class="btn-primary" style="padding:8px 14px;border-radius:9px"
+                                onclick="addReceiptItem()">+ Add</button>
+                        </div>
+                        <div id="rec-items" style="display:flex;flex-direction:column;gap:6px;min-height:60px"></div>
+                    </div>
+                    <!-- Step 3 -->
+                    <div id="rec-step3" style="display:none">
+                        <div
+                            style="background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--border)">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:10px;font-weight:600">RECEIPT
+                                SUMMARY</div>
+                            <div id="rec-summary"></div>
+                        </div>
+                        <div
+                            style="background:rgba(90,138,74,.06);border:1px solid rgba(90,138,74,.2);border-radius:10px;padding:10px 14px;font-size:10px;color:#3A6A2A;font-weight:500;margin-top:4px">
+                            ✓ Validating will increase stock for all listed products automatically.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="rec-back-btn" onclick="recBack()" style="display:none">←
+                        Back</button>
+                    <button class="btn-secondary" onclick="closeModal('modal-receipts')">Cancel</button>
+                    <button class="btn-primary" id="rec-next-btn" onclick="recNext()">Next →</button>
+                    <button class="btn-success" id="rec-validate-btn" onclick="validateReceipt()" style="display:none">✓
+                        Validate Receipt</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL: DELIVERY ORDERS ══ -->
+        <div class="modal-backdrop" id="modal-delivery">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title"><span>🚚</span>Delivery Order — Outgoing Goods</div>
+                    <div class="modal-close" onclick="closeModal('modal-delivery')">✕</div>
+                </div>
+                <div class="modal-body">
+                    <div class="steps">
+                        <div class="step active" id="del-s1">
+                            <div class="step-num">1</div><span>Pick</span>
+                        </div>
+                        <div class="step-line" id="del-l1"></div>
+                        <div class="step" id="del-s2">
+                            <div class="step-num">2</div><span>Pack</span>
+                        </div>
+                        <div class="step-line" id="del-l2"></div>
+                        <div class="step" id="del-s3">
+                            <div class="step-num">3</div><span>Validate</span>
+                        </div>
+                    </div>
+                    <div id="del-step1">
+                        <div class="frow2">
+                            <div class="frow"><label class="flbl">Customer / Destination *</label><input class="finput"
+                                    id="del-customer" placeholder="e.g. Client A"></div>
+                            <div class="frow"><label class="flbl">Source Warehouse</label>
+                                <select class="finput" id="del-wh">
+                                    <option>WH-01</option>
+                                    <option>WH-02</option>
+                                    <option>Zone-A</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="frow"><label class="flbl">Delivery Due Date</label><input class="finput" type="date"
+                                id="del-date"></div>
+                        <div style="display:flex;gap:8px;margin-top:4px">
+                            <select class="finput" id="del-prod-sel" style="flex:1"></select>
+                            <input class="finput" id="del-qty" type="number" min="1" placeholder="Qty"
+                                style="width:80px">
+                            <button class="btn-primary" style="padding:8px 14px;border-radius:9px"
+                                onclick="addDeliveryItem()">+ Add</button>
+                        </div>
+                        <div id="del-items"
+                            style="display:flex;flex-direction:column;gap:6px;margin-top:8px;min-height:50px"></div>
+                    </div>
+                    <div id="del-step2" style="display:none">
+                        <div
+                            style="background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--border)">
+                            <div style="font-size:10px;color:var(--muted);margin-bottom:8px;font-weight:600">PACKING
+                                LIST</div>
+                            <div id="del-pack-list"></div>
+                        </div>
+                        <div class="frow" style="margin-top:8px"><label class="flbl">Packed By</label><input
+                                class="finput" id="del-packed-by" placeholder="Staff name"></div>
+                    </div>
+                    <div id="del-step3" style="display:none">
+                        <div
+                            style="background:var(--card);border-radius:12px;padding:14px;border:1px solid var(--border)">
+                            <div id="del-summary"></div>
+                        </div>
+                        <div
+                            style="background:rgba(192,80,64,.06);border:1px solid rgba(192,80,64,.2);border-radius:10px;padding:10px 14px;font-size:10px;color:#A04030;font-weight:500;margin-top:4px">
+                            ⚠ Validating will decrease stock for all listed products automatically.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="del-back-btn" onclick="delBack()" style="display:none">←
+                        Back</button>
+                    <button class="btn-secondary" onclick="closeModal('modal-delivery')">Cancel</button>
+                    <button class="btn-primary" id="del-next-btn" onclick="delNext()">Next →</button>
+                    <button class="btn-success" id="del-validate-btn" onclick="validateDelivery()"
+                        style="display:none">✓ Validate Delivery</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL: INTERNAL TRANSFER ══ -->
+        <div class="modal-backdrop" id="modal-transfer">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title"><span>🔄</span>Internal Transfer</div>
+                    <div class="modal-close" onclick="closeModal('modal-transfer')">✕</div>
+                </div>
+                <div class="modal-body">
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">From Location *</label>
+                            <select class="finput" id="tr-from">
+                                <option>Main Warehouse</option>
+                                <option>WH-01</option>
+                                <option>WH-02</option>
+                                <option>Rack A</option>
+                                <option>Rack B</option>
+                                <option>Production Floor</option>
+                                <option>Zone-A</option>
+                            </select>
+                        </div>
+                        <div class="frow"><label class="flbl">To Location *</label>
+                            <select class="finput" id="tr-to">
+                                <option>Production Floor</option>
+                                <option>WH-01</option>
+                                <option>WH-02</option>
+                                <option>Rack A</option>
+                                <option>Rack B</option>
+                                <option>Zone-A</option>
+                                <option>Main Warehouse</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Transfer Date</label><input class="finput" type="date"
+                                id="tr-date"></div>
+                        <div class="frow"><label class="flbl">Reference / Notes</label><input class="finput" id="tr-ref"
+                                placeholder="Optional reference"></div>
+                    </div>
+                    <div style="display:flex;gap:8px">
+                        <select class="finput" id="tr-prod-sel" style="flex:1"></select>
+                        <input class="finput" id="tr-qty" type="number" min="1" placeholder="Qty" style="width:80px">
+                        <button class="btn-primary" style="padding:8px 14px;border-radius:9px"
+                            onclick="addTransferItem()">+ Add</button>
+                    </div>
+                    <div id="tr-items" style="display:flex;flex-direction:column;gap:6px;min-height:50px"></div>
+                    <div
+                        style="background:rgba(139,111,46,.06);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:10px;color:var(--muted);font-weight:500">
+                        📋 Each movement is automatically logged in the stock ledger.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('modal-transfer')">Cancel</button>
+                    <button class="btn-primary" onclick="validateTransfer()">✓ Confirm Transfer</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL: STOCK ADJUSTMENT ══ -->
+        <div class="modal-backdrop" id="modal-adjustment">
+            <div class="modal">
+                <div class="modal-header">
+                    <div class="modal-title"><span>⚖️</span>Stock Adjustment</div>
+                    <div class="modal-close" onclick="closeModal('modal-adjustment')">✕</div>
+                </div>
+                <div class="modal-body">
+                    <div
+                        style="background:rgba(196,149,42,.08);border:1px solid rgba(196,149,42,.2);border-radius:10px;padding:10px 14px;font-size:10px;color:var(--gold2);font-weight:500;margin-bottom:2px">
+                        Use this to fix mismatches between recorded stock and physical count.
+                    </div>
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Product *</label><select class="finput"
+                                id="adj-prod"></select></div>
+                        <div class="frow"><label class="flbl">Location</label>
+                            <select class="finput" id="adj-loc">
+                                <option>WH-01</option>
+                                <option>WH-02</option>
+                                <option>Zone-A</option>
+                                <option>Rack A</option>
+                                <option>Rack B</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="frow2">
+                        <div class="frow"><label class="flbl">Recorded Stock</label><input class="finput"
+                                id="adj-recorded" readonly style="background:var(--bg);cursor:default"
+                                placeholder="Auto-filled"></div>
+                        <div class="frow"><label class="flbl">Actual Counted Qty *</label><input class="finput"
+                                id="adj-counted" type="number" min="0" placeholder="Enter physical count"
+                                oninput="calcAdjDiff()"></div>
+                    </div>
+                    <div class="frow"><label class="flbl">Reason</label>
+                        <select class="finput" id="adj-reason">
+                            <option value="">Select reason</option>
+                            <option>Physical count discrepancy</option>
+                            <option>Damaged goods</option>
+                            <option>Expired stock</option>
+                            <option>Theft / loss</option>
+                            <option>System error correction</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div id="adj-diff-box"
+                        style="display:none;border-radius:10px;padding:10px 14px;font-size:11px;font-weight:600;text-align:center">
+                    </div>
+                    <div style="border-top:1px solid var(--border);padding-top:12px">
+                        <div
+                            style="font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">
+                            Adjustment Log</div>
+                        <div id="adj-log"
+                            style="max-height:140px;overflow-y:auto;display:flex;flex-direction:column;gap:5px"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" onclick="closeModal('modal-adjustment')">Cancel</button>
+                    <button class="btn-primary" onclick="applyAdjustment()">Apply Adjustment</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ MODAL: MOVE HISTORY ══ -->
+        <div class="modal-backdrop" id="modal-movehistory">
+            <div class="modal" style="width:min(820px,96vw)">
+                <div class="modal-header">
+                    <div class="modal-title"><span>📋</span>Move History</div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                        <!-- Search -->
+                        <input class="finput" id="mh-search" placeholder="🔍 Reference or contact..."
+                            style="width:190px;font-size:10px;padding:5px 10px" oninput="renderMoveHistory()">
+                        <!-- View toggle -->
+                        <div style="display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden">
+                            <div id="mh-list-btn" onclick="setMHView('list')"
+                                style="padding:5px 10px;cursor:pointer;background:var(--gold);color:#FAF4E8;font-size:10px;font-weight:600;transition:all .15s">
+                                ≡ List</div>
+                            <div id="mh-kanban-btn" onclick="setMHView('kanban')"
+                                style="padding:5px 10px;cursor:pointer;background:var(--card);color:var(--muted);font-size:10px;font-weight:600;transition:all .15s">
+                                ⬛ Kanban</div>
+                        </div>
+                        <div class="modal-close" onclick="closeModal('modal-movehistory')">✕</div>
+                    </div>
+                </div>
+                <div class="modal-body" style="padding:14px 18px">
+                    <!-- List View -->
+                    <div id="mh-list-view">
+                        <div id="mh-table-wrap"></div>
+                    </div>
+                    <!-- Kanban View -->
+                    <div id="mh-kanban-view" style="display:none">
+                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px" id="mh-kanban-cols"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══ TOAST ══ -->
+        <div id="toast"
+            style="position:fixed;bottom:36px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark);color:#FAF4E8;font-size:11px;font-weight:500;padding:9px 20px;border-radius:20px;z-index:2000;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap">
+        </div>
+    </div>
+
+    <script>
+        /* ══════════════════════════════════
+           DASHBOARD LOGIC
+        ══════════════════════════════════ */
+        const pages = [
+            { num: '01', val: '4,821', sub: 'All Products' },
+            { num: '02', val: '1,240', sub: 'Electronics' },
+            { num: '03', val: '980', sub: 'Apparel' },
+            { num: '04', val: '2,601', sub: 'FMCG' },
+        ];
+        let pi = 0;
+        const dotsEl = document.getElementById('page-dots');
+        pages.forEach((_, i) => {
+            const d = document.createElement('div');
+            d.className = 'pdot' + (i === 0 ? ' on' : '');
+            d.onclick = () => goPage(i);
+            dotsEl.appendChild(d);
+        });
+        function goPage(i) {
+            pi = i;
+            const prev = pages[(i - 1 + pages.length) % pages.length];
+            const curr = pages[i];
+            const next = pages[(i + 1) % pages.length];
+            document.getElementById('prev-num').textContent = prev.num;
+            document.getElementById('bubble-val').textContent = curr.val;
+            document.getElementById('bubble-sub').textContent = curr.sub;
+            document.getElementById('next-num').textContent = next.num;
+            document.querySelectorAll('.pdot').forEach((d, idx) => d.classList.toggle('on', idx === i));
+        }
+        function prevPage() { goPage((pi - 1 + pages.length) % pages.length) }
+        function nextPage() { goPage((pi + 1) % pages.length) }
+        goPage(0);
+
+        const fstate = { type: 'Receipts', status: 'Draft', wh: 'All', cat: 'All' };
+        function setFilter(key, el, val) {
+            fstate[key] = val;
+            document.getElementById({ type: 'type-chips', status: 'status-chips', wh: 'wh-chips', cat: 'cat-chips' }[key])
+                .querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+            el.classList.add('on');
+            document.getElementById('active-summary').textContent =
+                `${fstate.type} · ${fstate.status} · ${fstate.wh === 'All' ? 'All Warehouses' : fstate.wh} · ${fstate.cat === 'All' ? 'All Categories' : fstate.cat}`;
+        }
+
+        [{ id: 'TRF-441', route: 'WH-01→WH-02', qty: '120u', status: 'done' },
+        { id: 'TRF-442', route: 'Zone-A→Zone-B', qty: '80u', status: 'done' },
+        { id: 'TRF-443', route: 'WH-02→WH-01', qty: '200u', status: 'transit' },
+        { id: 'TRF-444', route: 'WH-01→Zone-A', qty: '50u', status: 'transit' },
+        { id: 'TRF-445', route: 'Zone-B→WH-02', qty: '95u', status: 'pending' },
+        { id: 'TRF-446', route: 'WH-02→Zone-B', qty: '140u', status: 'pending' },
+        ].forEach(t => {
+            const d = document.createElement('div'); d.className = 'tr-card';
+            const cls = { done: 'ts-done', transit: 'ts-transit', pending: 'ts-pending' }[t.status];
+            const lb = { done: 'Completed', transit: 'In Transit', pending: 'Pending' }[t.status];
+            d.innerHTML = `<div class="tr-id">${t.id}</div><div class="tr-route">${t.route}</div><div class="tr-qty">${t.qty}</div><span class="tr-status ${cls}">${lb}</span>`;
+            document.getElementById('transfers-grid').appendChild(d);
+        });
+
+        /* ══════════════════════════════════
+           NOTIFICATION SYSTEM
+        ══════════════════════════════════ */
+        // Notifications array — add items here to show notifications,
+        // leave empty for the "No notifications" state
+        const notifications = [
+            // example items (uncomment to test populated state):
+            // {id:1, msg:'DEL-2041 is ready for dispatch', time:'2 min ago', read:false},
+            // {id:2, msg:'Stock alert: Wireless Earbuds Pro out of stock', time:'14 min ago', read:false},
+            // {id:3, msg:'TRF-443 transfer completed', time:'1 hr ago', read:true},
+        ];
+
+        function renderNotifs() {
+            const body = document.getElementById('nd-body');
+            const badge = document.getElementById('notif-badge');
+            const clearBtn = document.getElementById('nd-clear-btn');
+            const bellBtn = document.getElementById('bell-btn');
+            body.innerHTML = '';
+
+            const unread = notifications.filter(n => !n.read).length;
+
+            if (notifications.length === 0) {
+                body.innerHTML = `
+      <div class="nd-empty">
+        <div class="nd-empty-icon">🔔</div>
+        <div class="nd-empty-text">No notifications right now.<br>You're all caught up!</div>
+      </div>`;
+                badge.style.display = 'none';
+                clearBtn.style.display = 'none';
+                bellBtn.classList.remove('has-notif');
+            } else {
+                notifications.forEach(n => {
+                    const item = document.createElement('div');
+                    item.className = 'nd-item';
+                    item.innerHTML = `<div class="nd-dot${n.read ? ' read' : ''}"></div><div class="nd-info"><div class="nd-msg">${n.msg}</div><div class="nd-time">${n.time}</div></div>`;
+                    item.onclick = () => { n.read = true; renderNotifs(); };
+                    body.appendChild(item);
+                });
+                if (unread > 0) {
+                    badge.style.display = 'flex';
+                    badge.textContent = unread;
+                    bellBtn.classList.add('has-notif');
+                } else {
+                    badge.style.display = 'none';
+                    bellBtn.classList.remove('has-notif');
+                }
+                clearBtn.style.display = 'block';
+            }
+        }
+
+        function toggleNotif(e) {
+            e.stopPropagation();
+            const dd = document.getElementById('notif-dd');
+            const isOpen = dd.classList.toggle('open');
+            if (isOpen) renderNotifs();
+        }
+
+        function clearNotifs() {
+            notifications.length = 0;
+            renderNotifs();
+        }
+
+        // Close notif dropdown on outside click
+        document.addEventListener('click', () => {
+            document.getElementById('notif-dd').classList.remove('open');
+            document.getElementById('profile-dd').classList.remove('open');
+        });
+
+        /* Profile dropdown */
+        function toggleProfileDD(e) {
+            e.stopPropagation();
+            const dd = document.getElementById('profile-dd');
+            const notifDd = document.getElementById('notif-dd');
+            notifDd.classList.remove('open');
+            dd.classList.toggle('open');
+        }
+
+        // Initial render to set badge state
+        renderNotifs();
+
+        /* ── Dynamic username from login ── */
+        (function () {
+            const uname = sessionStorage.getItem('loggedInUser') || 'User';
+            const initials = uname.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            const el_nm = document.getElementById('pd-username');
+            const el_av = document.getElementById('pd-av-initials');
+            // nav label ALWAYS stays "Profile" — only the dropdown shows the real name
+            if (el_nm) el_nm.textContent = uname;
+            if (el_av) el_av.textContent = initials || 'U';
+        })();
+
+        /* ══════════════════════════════════
+           SYSTEM MAP
+        ══════════════════════════════════ */
+        const W = 1500, H = 1100;
+        const CX = 750, CY = 550;
+        const CN_W = 144, CN_H = 66;
+        const BN_W = 126, BN_H = 64;
+        const SN_W = 138, SN_H = 56;
+        const BRANCH_R = 240;
+        // SUB_DIST: distance from branch node center to the row/column of sub nodes
+        const SUB_DIST = 270;
+        const SUB_STEP_H = SN_W + 28;
+        const SUB_STEP_V = SN_H + 28;
+
+        const branches = [
+            {
+                id: 'products', label: 'Products', icon: '📦', angle: -90,
+                subs: [
+                    { id: 'p1', icon: '✏️', label: ['Create/Update', 'Products'] },
+                    { id: 'p2', icon: '📍', label: ['Stock per', 'Location'] },
+                    { id: 'p3', icon: '🗂️', label: ['Product', 'Categories'] },
+                    { id: 'p4', icon: '🔁', label: ['Reordering', 'Rules'] },
+                ]
+            },
+            {
+                id: 'operations', label: 'Operations', icon: '⚙️', angle: -30,
+                subs: [
+                    { id: 'o1', icon: '📥', label: ['Receipts', '(Incoming)'] },
+                    { id: 'o2', icon: '🚚', label: ['Delivery Orders', '(Outgoing)'] },
+                    { id: 'o3', icon: '⚖️', label: ['Inventory', 'Adjustment'] },
+                ]
+            },
+            {
+                id: 'movehistory', label: ['Move', 'History'], icon: '📋', angle: 30,
+                subs: [
+                    { id: 'mh1', icon: '📋', label: ['View', 'History'] },
+                ]
+            },
+            {
+                id: 'settings', label: 'Settings', icon: '🔧', angle: 150,
+                subs: [
+                    { id: 's1', icon: '🏭', label: ['Warehouse'] },
+                ]
+            },
+            {
+                id: 'profile', label: ['Profile', 'Menu'], icon: '👤', angle: 210,
+                subs: [
+                    { id: 'pr1', icon: '🪪', label: ['My Profile'] },
+                    { id: 'pr2', icon: '🚪', label: ['Logout'] },
+                ]
+            },
+        ];
+
+        // Sub layout: subs spread perpendicular to the spoke direction
+        // Step size adapts: if perp is mostly horizontal → use SN_W+gap, else SN_H+gap
+        function getSubLayout(b) {
+            const n = b.subs.length;
+            if (n === 0) return [];
+            const bp = bpos(b);
+            const rad = b.angle * Math.PI / 180;
+            const ux = Math.cos(rad), uy = Math.sin(rad); // outward unit vector
+            const px = -uy, py = ux;                       // perpendicular unit vector
+            // Choose step: if perp direction is more horizontal use H-step, else V-step
+            const step = Math.abs(px) > Math.abs(py) ? SUB_STEP_H : SUB_STEP_V;
+            const totalSpan = (n - 1) * step;
+            return b.subs.map((_, i) => {
+                const offset = i * step - totalSpan / 2;
+                const sx = bp.x + ux * SUB_DIST + px * offset;
+                const sy = bp.y + uy * SUB_DIST + py * offset;
+                return { sx, sy, ux, uy };
+            });
+        }
+
+        const C_NODE_FILL = '#2C2415';
+        const C_NODE_STROKE = '#C4952A';
+        const C_CENTER_FILL = '#8B6F2E';
+        const C_CENTER_STROKE = '#D4A843';
+        const C_SUB_FILL = '#F5EDD8';
+        const C_SUB_STROKE = '#C4952A';
+        const C_TEXT_LIGHT = '#FAF4E8';
+        const C_TEXT_DARK = '#2C2415';
+        const C_EDGE = '#C4952A';
+        const C_SUB_EDGE = '#D4A843';
+        const C_DOT_FILL = '#FAF4E8';
+        const C_DIM = 'rgba(237,223,187,0.55)'; // overlay colour for dimming
+
+        let activeBranch = null;
+        let zoomLevel = 1, panX = 0, panY = 0;
+        let drag = false, dx0 = 0, dy0 = 0, px0 = 0, py0 = 0;
+
+        function deg(a) { return a * Math.PI / 180 }
+        function bpos(b) { return { x: CX + BRANCH_R * Math.cos(deg(b.angle)), y: CY + BRANCH_R * Math.sin(deg(b.angle)) } }
+
+        const NS = 'http://www.w3.org/2000/svg';
+        function svgEl(tag, attrs, parent) {
+            const e = document.createElementNS(NS, tag);
+            Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+            parent && parent.appendChild(e); return e;
+        }
+        function svgText(parent, x, y, lines, fill, fz, fw) {
+            const t = svgEl('text', { x, y, 'text-anchor': 'middle', 'dominant-baseline': 'central', fill, 'font-size': fz, 'font-weight': fw, 'font-family': 'DM Sans,sans-serif' }, parent);
+            if (lines.length === 1) { t.textContent = lines[0]; }
+            else {
+                const lh = fz * 1.35, startDy = -(lines.length - 1) * lh / 2;
+                lines.forEach((ln, i) => { const ts = svgEl('tspan', { x, dy: i === 0 ? startDy : lh }, t); ts.textContent = ln; });
+            }
+            return t;
+        }
+        function rrect(parent, x, y, w, h, r, fill, stroke, sw) {
+            return svgEl('rect', { x: x - w / 2, y: y - h / 2, width: w, height: h, rx: r, ry: r, fill, stroke, 'stroke-width': sw }, parent);
+        }
+
+        // Per-branch groups for selective show/hide/dim
+        const branchGroups = {}; // id → {spoke, node, subEdges, subNodes}
+
+        // Maps each sub-node id → which modal to open on click
+        const subModalMap = {
+            'p1': 'modal-products',          // Create/Update Products
+            'p2': 'modal-stock-location',    // Stock per Location
+            'p3': 'modal-categories',        // Product Categories
+            'p4': 'modal-reorder',           // Reordering Rules
+            'o1': 'modal-receipts',
+            'o2': 'modal-delivery',
+            'o3': 'modal-adjustment',
+            'mh1': 'modal-movehistory',
+            's1': 'modal-transfer',
+            'pr1': 'modal-products',
+            'pr2': 'modal-products',
+        };
+
+        function buildMap() {
+            const svg = document.getElementById('map-svg');
+            svg.innerHTML = '';
+            svg.setAttribute('width', W); svg.setAttribute('height', H);
+            svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+            // Layer order (bottom to top):
+            // spokes → subEdges → subNodes → branchNodes
+            // Branch nodes are on TOP so edges appear to emerge from behind them
+            // Sub nodes are above sub-edges so boxes naturally cover line ends
+            const spokeLayer = svgEl('g', { id: 'spokes' }, svg);
+            const subEdgeLayer = svgEl('g', { id: 'subedges' }, svg);
+            const subNodeLayer = svgEl('g', { id: 'subnodes' }, svg);
+            const nodeLayer = svgEl('g', { id: 'nodes' }, svg);
+            const dimLayer = svgEl('g', { id: 'dim' }, svg);
+
+            // Center node
+            const cg = svgEl('g', { 'data-id': 'center' }, nodeLayer);
+            rrect(cg, CX, CY, CN_W, CN_H, 9, C_CENTER_FILL, C_CENTER_STROKE, 2.5);
+            svgEl('text', { x: CX, y: CY - 13, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': '20' }, cg).textContent = '🏭';
+            svgText(cg, CX, CY + 11, ['LOGISTICS SYSTEM'], C_TEXT_LIGHT, 11, 700);
+
+            branches.forEach(b => {
+                const bp = bpos(b);
+
+                // Spoke
+                const spokeG = svgEl('g', { 'data-spoke': b.id }, spokeLayer);
+                svgEl('line', { x1: CX, y1: CY, x2: bp.x, y2: bp.y, stroke: C_EDGE, 'stroke-width': '2.5', 'stroke-linecap': 'round' }, spokeG);
+
+                // Branch node
+                const nodeG = svgEl('g', { 'data-id': b.id, style: 'cursor:pointer' }, nodeLayer);
+                nodeG.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (b.id === 'movehistory') { openModal('modal-movehistory'); return; }
+                    selectBranch(b);
+                });
+                const label = Array.isArray(b.label) ? b.label : [b.label];
+                const has2 = label.length > 1;
+                rrect(nodeG, bp.x, bp.y, BN_W, BN_H, 7, C_NODE_FILL, C_NODE_STROKE, 2);
+                const iconY = has2 ? bp.y - 18 : bp.y - 11;
+                const textY = has2 ? bp.y + 12 : bp.y + 14;
+                svgEl('text', { x: bp.x, y: iconY, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': '16' }, nodeG).textContent = b.icon;
+                svgText(nodeG, bp.x, textY, label, C_TEXT_LIGHT, 11, 600);
+
+                // Sub edges (hidden initially)
+                const subEG = svgEl('g', { 'data-sub-edges': b.id, opacity: '0', 'pointer-events': 'none' }, subEdgeLayer);
+                // Sub nodes (hidden initially)
+                const subNG = svgEl('g', { 'data-sub-nodes': b.id, opacity: '0', 'pointer-events': 'none' }, subNodeLayer);
+
+                if (b.subs.length > 0) {
+                    const layout = getSubLayout(b);
+                    // Collect hub point: midpoint between branch and first/last sub
+                    // Draw a single hub line from branch, then branch to each sub
+                    const rad = b.angle * Math.PI / 180;
+                    const ux = Math.cos(rad), uy = Math.sin(rad);
+                    // hub sits between branch center and subs — close to branch
+                    const hubX = bp.x + ux * (SUB_DIST * 0.35);
+                    const hubY = bp.y + uy * (SUB_DIST * 0.35);
+                    // trunk: draw from branch CENTER — branch node box (top layer) covers the start
+                    svgEl('line', { x1: bp.x, y1: bp.y, x2: hubX, y2: hubY, stroke: C_SUB_EDGE, 'stroke-width': '2', 'stroke-linecap': 'round' }, subEG);
+
+                    layout.forEach(({ sx, sy }, i) => {
+                        const sub = b.subs[i];
+                        // draw line all the way to sub center — sub node box (above this layer) covers the end
+                        svgEl('line', { x1: hubX, y1: hubY, x2: sx, y2: sy, stroke: C_SUB_EDGE, 'stroke-width': '1.8', 'stroke-linecap': 'round' }, subEG);
+
+                        // Sub node — clickable, opens its feature modal
+                        const modalId = subModalMap[sub.id];
+                        const subLabel = Array.isArray(sub.label) ? sub.label : [sub.label];
+                        const sg2 = svgEl('g', { style: 'cursor:pointer' }, subNG);
+                        rrect(sg2, sx, sy, SN_W, SN_H, 6, C_SUB_FILL, C_SUB_STROKE, 1.5);
+                        svgEl('text', { x: sx, y: sy - 12, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': '13' }, sg2).textContent = sub.icon;
+                        svgText(sg2, sx, sy + 7, subLabel, C_TEXT_DARK, 9.5, 600);
+                        if (modalId) {
+                            sg2.addEventListener('click', e => { e.stopPropagation(); openModal(modalId); });
+                            // hover: highlight box
+                            sg2.addEventListener('mouseenter', () => sg2.querySelector('rect').setAttribute('fill', '#EDE4C8'));
+                            sg2.addEventListener('mouseleave', () => sg2.querySelector('rect').setAttribute('fill', C_SUB_FILL));
+                        }
+                    });
+                }
+
+                // Dim overlay rect (full canvas, semi-transparent, used to dim this branch when another is selected)
+                // We actually dim at the branch level — store refs
+                branchGroups[b.id] = { spokeG, nodeG, subEG, subNG };
+            });
+
+            // Click on background → do NOT deselect (user must click the branch again to toggle off)
+
+            resetZoom();
+        }
+
+        function selectBranch(b) {
+            if (activeBranch === b.id) { deselectBranch(); return; }
+            activeBranch = b.id;
+
+            branches.forEach(other => {
+                const grp = branchGroups[other.id];
+                if (!grp) return;
+                if (other.id === b.id) {
+                    // selected: full opacity, show subs
+                    grp.spokeG.setAttribute('opacity', '1');
+                    grp.nodeG.setAttribute('opacity', '1');
+                    grp.subEG.setAttribute('opacity', '1'); grp.subEG.style.pointerEvents = 'all';
+                    grp.subNG.setAttribute('opacity', '1'); grp.subNG.style.pointerEvents = 'all';
+                    // highlight branch node fill
+                    grp.nodeG.querySelector('rect').setAttribute('fill', C_CENTER_FILL);
+                } else {
+                    // dim others
+                    grp.spokeG.setAttribute('opacity', '0.15');
+                    grp.nodeG.setAttribute('opacity', '0.15');
+                    grp.subEG.setAttribute('opacity', '0'); grp.subEG.style.pointerEvents = 'none';
+                    grp.subNG.setAttribute('opacity', '0'); grp.subNG.style.pointerEvents = 'none';
+                    grp.nodeG.querySelector('rect').setAttribute('fill', C_NODE_FILL);
+                }
+            });
+
+            // Also dim center node slightly
+            const cg = document.querySelector('[data-id="center"]');
+            if (cg) cg.setAttribute('opacity', '0.3');
+
+            // Zoom to show selected branch + its subs
+            zoomToBranch(b);
+        }
+
+        function deselectBranch() {
+            activeBranch = null;
+            branches.forEach(b => {
+                const grp = branchGroups[b.id];
+                if (!grp) return;
+                grp.spokeG.setAttribute('opacity', '1');
+                grp.nodeG.setAttribute('opacity', '1');
+                grp.nodeG.querySelector('rect').setAttribute('fill', C_NODE_FILL);
+                grp.subEG.setAttribute('opacity', '0'); grp.subEG.style.pointerEvents = 'none';
+                grp.subNG.setAttribute('opacity', '0'); grp.subNG.style.pointerEvents = 'none';
+            });
+            const cg = document.querySelector('[data-id="center"]');
+            if (cg) cg.setAttribute('opacity', '1');
+            // zoom back out to overview when deselecting
+            resetZoom();
+        }
+
+        function zoomToBranch(b) {
+            const stage = document.getElementById('map-stage');
+            const vw = stage.offsetWidth, vh = stage.offsetHeight;
+            const bp = bpos(b);
+            const layout = getSubLayout(b);
+
+            // Compute bounding box of branch node + its subs
+            let minX = bp.x - BN_W / 2, maxX = bp.x + BN_W / 2;
+            let minY = bp.y - BN_H / 2, maxY = bp.y + BN_H / 2;
+            layout.forEach(({ sx, sy }) => {
+                minX = Math.min(minX, sx - SN_W / 2); maxX = Math.max(maxX, sx + SN_W / 2);
+                minY = Math.min(minY, sy - SN_H / 2); maxY = Math.max(maxY, sy + SN_H / 2);
+            });
+
+            const pad = 60;
+            minX -= pad; maxX += pad; minY -= pad; maxY += pad;
+            const bboxW = maxX - minX, bboxH = maxY - minY;
+            const scale = Math.min(vw / bboxW, vh / bboxH) * 0.88;
+            const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+
+            panX = vw / 2 - cx * scale;
+            panY = vh / 2 - cy * scale;
+            zoomLevel = scale;
+            applyT();
+        }
+
+        let minZoom = 0.3; // set on first resetZoom call
+        function applyT() {
+            document.getElementById('map-inner').style.transform = `translate(${panX}px,${panY}px) scale(${zoomLevel})`;
+        }
+        function zoomMap(f) {
+            const s = document.getElementById('map-stage');
+            const cx = s.offsetWidth / 2, cy = s.offsetHeight / 2;
+            panX = cx - (cx - panX) * f; panY = cy - (cy - panY) * f;
+            zoomLevel = Math.min(Math.max(zoomLevel * f, minZoom), 5); applyT();
+        }
+        function resetZoom() {
+            const s = document.getElementById('map-stage');
+            const vw = s.offsetWidth, vh = s.offsetHeight;
+            // base = fit whole canvas; default view = 1.5× that so nodes are clearly visible
+            const fitScale = Math.min((vw - 80) / W, (vh - 80) / H);
+            const scale = fitScale * 2.2;
+            minZoom = fitScale * 0.85;
+            // center the map
+            panX = (vw - W * scale) / 2; panY = (vh - H * scale) / 2;
+            zoomLevel = scale; applyT();
+        }
+
+        const stage = document.getElementById('map-stage');
+        stage.addEventListener('mousedown', e => {
+            if (e.target.closest('[data-id]')) return;
+            drag = true; dx0 = e.clientX; dy0 = e.clientY; px0 = panX; py0 = panY;
+        });
+        window.addEventListener('mousemove', e => { if (!drag) return; panX = px0 + (e.clientX - dx0); panY = py0 + (e.clientY - dy0); applyT(); });
+        window.addEventListener('mouseup', () => { drag = false; });
+        stage.addEventListener('wheel', e => {
+            e.preventDefault();
+            const f = e.deltaY < 0 ? 1.1 : 1 / 1.1;
+            const r = stage.getBoundingClientRect();
+            const mx = e.clientX - r.left, my = e.clientY - r.top;
+            panX = mx - (mx - panX) * f; panY = my - (my - panY) * f;
+            zoomLevel = Math.min(Math.max(zoomLevel * f, minZoom), 5); applyT();
+        }, { passive: false });
+        let lastTouchDist = 0;
+        stage.addEventListener('touchstart', e => {
+            if (e.touches.length === 1) { drag = true; dx0 = e.touches[0].clientX; dy0 = e.touches[0].clientY; px0 = panX; py0 = panY; }
+            if (e.touches.length === 2) { lastTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); }
+        }, { passive: true });
+        stage.addEventListener('touchmove', e => {
+            if (e.touches.length === 1 && drag) { panX = px0 + (e.touches[0].clientX - dx0); panY = py0 + (e.touches[0].clientY - dy0); applyT(); }
+            if (e.touches.length === 2) {
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                const f = dist / lastTouchDist; lastTouchDist = dist;
+                zoomLevel = Math.min(Math.max(zoomLevel * f, minZoom), 5); applyT();
+            }
+        }, { passive: true });
+        stage.addEventListener('touchend', () => { drag = false; });
+
+        function showSystemMap() {
+            const ov = document.getElementById('overlay'); ov.classList.add('show');
+            setTimeout(() => {
+                document.getElementById('dashboard-view').style.display = 'none';
+                document.getElementById('map-view').style.display = 'block';
+                document.getElementById('dash-btn').classList.remove('on');
+                document.getElementById('sysmap-btn').classList.add('active');
+                activeBranch = null; buildMap(); ov.classList.remove('show');
+            }, 350);
+        }
+        function showDashboard() {
+            const ov = document.getElementById('overlay'); ov.classList.add('show');
+            setTimeout(() => {
+                document.getElementById('map-view').style.display = 'none';
+                document.getElementById('dashboard-view').style.display = 'flex';
+                document.getElementById('dash-btn').classList.add('on');
+                document.getElementById('sysmap-btn').classList.remove('active');
+                activeBranch = null; ov.classList.remove('show');
+            }, 350);
+        }
+
+        /* ══════════════════════════════════
+           CORE FEATURES JS
+        ══════════════════════════════════ */
+        let products = [
+            { name: 'Wireless Earbuds Pro', sku: 'WEP-001', cat: 'Electronics', uom: 'Units', cost: 2499, stock: 0, reserved: 0 },
+            { name: 'LED Bulb 9W Pack', sku: 'LBP-009', cat: 'Electronics', uom: 'Units', cost: 149, stock: 0, reserved: 0 },
+            { name: 'Cotton T-Shirt XL', sku: 'CTS-XL', cat: 'Apparel', uom: 'Units', cost: 599, stock: 12, reserved: 2 },
+            { name: 'Energy Drink 330ml', sku: 'END-330', cat: 'FMCG', uom: 'Units', cost: 85, stock: 8, reserved: 0 },
+            { name: 'Steel Rods 10mm', sku: 'STL-10', cat: 'Raw Materials', uom: 'Kg', cost: 320, stock: 150, reserved: 10 },
+        ];
+        let receipts = [], deliveries = [], transfers = [], adjustments = [];
+        let recStep = 1, delStep = 1, recItems = [], delItems = [], trItems = [];
+
+        function toast(msg, isErr) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.style.background = isErr ? '#8B3A2A' : 'var(--dark)';
+            t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+            setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; }, 2600);
+        }
+        function openModal(id) {
+            if (id === 'modal-products') { pmEditIdx = -1; resetProductForm(); renderProductList(); }
+            if (id === 'modal-stock-location') { renderStockLocation(); }
+            if (id === 'modal-categories') { renderCategoryList(); }
+            if (id === 'modal-reorder') { populateSel('rr-prod'); renderReorderList(); }
+            if (id === 'modal-receipts') { recStep = 1; recItems = []; renderRecStep(); populateSel('rec-prod-sel'); }
+            if (id === 'modal-delivery') { delStep = 1; delItems = []; renderDelStep(); populateSel('del-prod-sel'); }
+            if (id === 'modal-transfer') { trItems = []; renderTrItems(); populateSel('tr-prod-sel'); }
+            if (id === 'modal-adjustment') { populateSel('adj-prod'); document.getElementById('adj-recorded').value = ''; document.getElementById('adj-diff-box').style.display = 'none'; renderAdjLog(); }
+            if (id === 'modal-movehistory') { setTimeout(() => { mhView = 'list'; setMHView('list'); }, 10); }
+            document.getElementById(id).classList.add('open');
+        }
+        function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+        document.querySelectorAll('.modal-backdrop').forEach(bd => bd.addEventListener('click', e => { if (e.target === bd) bd.classList.remove('open'); }));
+
+        function populateSel(id) {
+            const sel = document.getElementById(id); if (!sel) return;
+            sel.innerHTML = '<option value="">Select product</option>' + products.map((p, i) => `<option value="${i}">${p.name} (${p.stock} ${p.uom})</option>`).join('');
+        }
+
+        // ═══════════════════════════════════════
+        // 1. CREATE / UPDATE PRODUCTS
+        // ═══════════════════════════════════════
+        let pmEditIdx = -1;
+
+        function resetProductForm() {
+            ['pm-name', 'pm-sku', 'pm-cost', 'pm-stock'].forEach(i => { const e = document.getElementById(i); if (e) e.value = ''; });
+            const c = document.getElementById('pm-cat'); if (c) c.value = '';
+            const u = document.getElementById('pm-uom'); if (u) u.value = '';
+            const btn = document.getElementById('pm-save-btn'); if (btn) btn.textContent = '+ Add Product';
+            const banner = document.getElementById('pm-edit-banner'); if (banner) banner.style.display = 'none';
+            pmEditIdx = -1;
+        }
+
+        function editProduct(idx) {
+            const p = products[idx]; pmEditIdx = idx;
+            document.getElementById('pm-name').value = p.name;
+            document.getElementById('pm-sku').value = p.sku;
+            document.getElementById('pm-cat').value = p.cat || '';
+            document.getElementById('pm-uom').value = p.uom || '';
+            document.getElementById('pm-cost').value = p.cost || '';
+            document.getElementById('pm-stock').value = p.stock;
+            const btn = document.getElementById('pm-save-btn'); if (btn) btn.textContent = '✓ Update Product';
+            const banner = document.getElementById('pm-edit-banner');
+            if (banner) { banner.style.display = 'flex'; document.getElementById('pm-edit-name').textContent = p.name; }
+            document.getElementById('pm-name').focus();
+        }
+
+        function cancelProductEdit() { resetProductForm(); renderProductList(); }
+
+        function renderProductList() {
+            const el = document.getElementById('pm-list'); if (!el) return;
+            const q = (document.getElementById('pm-search')?.value || '').toLowerCase();
+            const filtered = products.map((p, i) => ({ ...p, _i: i })).filter(p => !q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q));
+            if (!filtered.length) { el.innerHTML = '<div style="font-size:10px;color:var(--muted);text-align:center;padding:12px">No products found</div>'; return; }
+            el.innerHTML = `<table class="mtable"><thead><tr><th>Name</th><th>SKU</th><th>Category</th><th>UOM</th><th>Cost (₹)</th><th>On Hand</th><th>Free to Use</th><th></th></tr></thead><tbody>${filtered.map(p => `<tr style="${pmEditIdx === p._i ? 'background:rgba(196,149,42,.08)' : ''}">
+      <td style="font-weight:600">${p.name}</td>
+      <td style="color:var(--muted);font-family:monospace;font-size:9px">${p.sku}</td>
+      <td>${p.cat || '—'}</td><td>${p.uom || '—'}</td>
+      <td style="color:var(--gold2);font-weight:600">${p.cost ? '₹' + Number(p.cost).toLocaleString() : '—'}</td>
+      <td style="font-weight:700;color:${p.stock === 0 ? '#C05040' : 'var(--dark)'}">${p.stock}</td>
+      <td style="font-weight:700;color:#5A8A4A">${Math.max(0, p.stock - (p.reserved || 0))}</td>
+      <td><button onclick="editProduct(${p._i})" style="font-size:9px;padding:2px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);cursor:pointer;color:var(--gold2);font-weight:600">✏ Edit</button></td>
+    </tr>`).join('')
+                }</tbody></table>`;
+        }
+
+        function saveProduct() {
+            const name = document.getElementById('pm-name').value.trim();
+            const sku = document.getElementById('pm-sku').value.trim();
+            if (!name || !sku) { toast('Name and SKU are required', true); return; }
+            const stock = parseInt(document.getElementById('pm-stock').value) || 0;
+            const cost = parseFloat(document.getElementById('pm-cost').value) || 0;
+            const cat = document.getElementById('pm-cat').value;
+            const uom = document.getElementById('pm-uom').value;
+            if (pmEditIdx >= 0) {
+                const dup = products.findIndex((p, i) => p.sku === sku && i !== pmEditIdx);
+                if (dup >= 0) { toast('SKU already used by another product', true); return; }
+                products[pmEditIdx] = { ...products[pmEditIdx], name, sku, cat, uom, cost, stock };
+                toast(`✓ "${name}" updated`); resetProductForm();
+            } else {
+                if (products.some(p => p.sku === sku)) { toast('SKU already exists', true); return; }
+                products.push({ name, sku, cat, uom, cost, stock, reserved: 0 });
+                ['pm-name', 'pm-sku', 'pm-cost', 'pm-stock'].forEach(i => { const e = document.getElementById(i); if (e) e.value = ''; });
+                toast(`✓ "${name}" added`);
+            }
+            renderProductList();
+        }
+
+        // ═══════════════════════════════════════
+        // 2. STOCK PER LOCATION
+        // ═══════════════════════════════════════
+        const stockByLocation = {};
+        function ensureStockByLocation() {
+            products.forEach((_, i) => {
+                if (!stockByLocation[i]) stockByLocation[i] = { 'WH-01': products[i].stock, 'WH-02': 0, 'Zone-A': 0, 'Rack A': 0, 'Rack B': 0 };
+            });
+        }
+
+        function renderStockLocation() {
+            ensureStockByLocation();
+            const el = document.getElementById('sl-table'); if (!el) return;
+            const loc = document.getElementById('sl-loc-filter')?.value || '';
+            const q = (document.getElementById('sl-search')?.value || '').toLowerCase();
+            const locs = loc ? [loc] : ['WH-01', 'WH-02', 'Zone-A', 'Rack A', 'Rack B'];
+            let rows = [];
+            products.forEach((p, i) => {
+                locs.forEach(l => {
+                    const onHand = (stockByLocation[i] && stockByLocation[i][l]) || 0;
+                    if (!loc && onHand === 0) return; // hide zero rows when viewing all
+                    rows.push({ pidx: i, name: p.name, sku: p.sku, cost: p.cost, uom: p.uom, loc: l, onHand, free: Math.max(0, onHand - (p.reserved || 0)) });
+                });
+            });
+            if (q) rows = rows.filter(r => r.name.toLowerCase().includes(q));
+            if (!rows.length) { el.innerHTML = '<div style="font-size:10px;color:var(--muted);text-align:center;padding:20px">No stock found. Select a specific location to see all slots.</div>'; return; }
+            el.innerHTML = `<table class="mtable"><thead><tr><th>Product</th><th>SKU</th><th>Location</th><th>Per Unit Cost</th><th>On Hand</th><th>Free to Use</th><th>Update Stock</th></tr></thead><tbody>${rows.map((r, ri) => `<tr>
+      <td style="font-weight:600">${r.name}</td>
+      <td style="color:var(--muted);font-size:9px;font-family:monospace">${r.sku}</td>
+      <td><span style="background:rgba(139,111,46,.1);border-radius:6px;padding:2px 7px;font-size:9px;font-weight:600">${r.loc}</span></td>
+      <td style="color:var(--gold2);font-weight:600">${r.cost ? '₹' + Number(r.cost).toLocaleString() : '—'}</td>
+      <td style="font-weight:700;color:${r.onHand === 0 ? '#C05040' : 'var(--dark)'}">${r.onHand}</td>
+      <td style="font-weight:700;color:#5A8A4A">${r.free}</td>
+      <td style="display:flex;gap:5px;align-items:center">
+        <input id="sl-upd-${ri}" type="number" min="0" value="${r.onHand}" class="finput" style="width:65px;padding:3px 7px;font-size:10px">
+        <button onclick="updateStockAtLocation(${r.pidx},'${r.loc}',document.getElementById('sl-upd-${ri}').value)" style="font-size:9px;padding:3px 10px;border:none;border-radius:6px;background:var(--gold);color:#FAF4E8;cursor:pointer;font-weight:600">✓ Set</button>
+      </td>
+    </tr>`).join('')
+                }</tbody></table>`;
+        }
+
+        function updateStockAtLocation(pidx, loc, val) {
+            const qty = parseInt(val);
+            if (isNaN(qty) || qty < 0) { toast('Invalid quantity', true); return; }
+            ensureStockByLocation();
+            stockByLocation[pidx][loc] = qty;
+            products[pidx].stock = Object.values(stockByLocation[pidx]).reduce((a, b) => a + b, 0);
+            toast(`✓ ${products[pidx].name} @ ${loc} → ${qty} units`);
+            renderStockLocation();
+        }
+
+        // ═══════════════════════════════════════
+        // 3. PRODUCT CATEGORIES
+        // ═══════════════════════════════════════
+        let categories = [
+            { name: 'Electronics', parent: 'All', desc: 'Electronic items and components' },
+            { name: 'Apparel', parent: 'All', desc: 'Clothing and accessories' },
+            { name: 'FMCG', parent: 'All', desc: 'Fast moving consumer goods' },
+            { name: 'Raw Materials', parent: 'All', desc: 'Input materials for production' },
+            { name: 'Machinery', parent: 'All', desc: 'Equipment and machines' },
+        ];
+
+        function renderCategoryList() {
+            const el = document.getElementById('cat-list'); if (!el) return;
+            if (!categories.length) { el.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:8px">No categories yet</div>'; return; }
+            el.innerHTML = `<table class="mtable"><thead><tr><th>Name</th><th>Parent</th><th>Description</th><th>Products</th><th></th></tr></thead><tbody>${categories.map((c, i) => `<tr>
+      <td style="font-weight:600">${c.name}</td>
+      <td style="color:var(--muted)">${c.parent || '—'}</td>
+      <td style="color:var(--muted);font-size:9px">${c.desc || '—'}</td>
+      <td style="font-weight:600;color:var(--gold2)">${products.filter(p => p.cat === c.name).length}</td>
+      <td><button onclick="deleteCategory(${i})" style="font-size:9px;padding:2px 8px;border:1px solid rgba(192,80,64,.3);border-radius:6px;background:rgba(192,80,64,.08);cursor:pointer;color:#C05040;font-weight:600">✕</button></td>
+    </tr>`).join('')
+                }</tbody></table>`;
+        }
+        function saveCategory() {
+            const name = document.getElementById('cat-name').value.trim();
+            if (!name) { toast('Category name required', true); return; }
+            if (categories.some(c => c.name === name)) { toast('Already exists', true); return; }
+            categories.push({ name, parent: document.getElementById('cat-parent').value, desc: document.getElementById('cat-desc').value.trim() });
+            document.getElementById('cat-name').value = ''; document.getElementById('cat-desc').value = '';
+            renderCategoryList(); toast(`✓ "${name}" added`);
+        }
+        function deleteCategory(i) {
+            if (products.filter(p => p.cat === categories[i].name).length) { toast('Cannot delete — products use this category', true); return; }
+            categories.splice(i, 1); renderCategoryList(); toast('Removed');
+        }
+
+        // ═══════════════════════════════════════
+        // 4. REORDERING RULES
+        // ═══════════════════════════════════════
+        let reorderRules = [];
+        function renderReorderList() {
+            const el = document.getElementById('rr-list'); if (!el) return;
+            if (!reorderRules.length) { el.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:8px">No rules set yet. Rules trigger alerts when stock falls below minimum.</div>'; return; }
+            el.innerHTML = `<table class="mtable"><thead><tr><th>Product</th><th>Location</th><th>Min Qty</th><th>Max Qty</th><th>Reorder Qty</th><th>Current Stock</th><th>Status</th><th></th></tr></thead><tbody>${reorderRules.map((r, i) => {
+                const p = products.find(p => p.name === r.product); const stock = p ? p.stock : 0; const needs = stock <= r.min;
+                return `<tr style="${needs ? 'background:rgba(192,80,64,.05)' : ''}">
+        <td style="font-weight:600">${r.product}</td><td>${r.loc}</td>
+        <td style="color:#C05040;font-weight:600">${r.min}</td>
+        <td style="color:var(--muted)">${r.max || '—'}</td>
+        <td style="color:#5A8A4A;font-weight:600">${r.reorderQty}</td>
+        <td style="font-weight:700;color:${needs ? '#C05040' : 'var(--dark)'}">${stock}</td>
+        <td><span class="sbadge ${needs ? 'pending' : 'ready'}">${needs ? '⚠ Reorder' : '✓ OK'}</span></td>
+        <td><button onclick="reorderRules.splice(${i},1);renderReorderList()" style="font-size:9px;padding:2px 8px;border:1px solid rgba(192,80,64,.3);border-radius:6px;background:rgba(192,80,64,.08);cursor:pointer;color:#C05040">✕</button></td>
+      </tr>`;
+            }).join('')
+                }</tbody></table>`;
+        }
+        function saveReorderRule() {
+            const sel = document.getElementById('rr-prod');
+            if (!sel || !sel.value) { toast('Select a product', true); return; }
+            const min = parseInt(document.getElementById('rr-min').value);
+            if (isNaN(min) || min < 0) { toast('Enter a valid minimum quantity', true); return; }
+            const product = products[parseInt(sel.value)].name;
+            const loc = document.getElementById('rr-loc').value;
+            if (reorderRules.some(r => r.product === product && r.loc === loc)) { toast('Rule already exists for this product + location', true); return; }
+            reorderRules.push({ product, loc, min, max: parseInt(document.getElementById('rr-max').value) || null, reorderQty: parseInt(document.getElementById('rr-qty').value) || min });
+            ['rr-min', 'rr-max', 'rr-qty'].forEach(i => { const e = document.getElementById(i); if (e) e.value = ''; });
+            renderReorderList(); toast(`✓ Rule added for "${product}"`);
+        }
+
+        // RECEIPTS
+        function renderRecStep() {
+            [1, 2, 3].forEach(n => {
+                const s = document.getElementById(`rec-step${n}`); if (s) { s.style.display = n === recStep ? 'flex' : 'none'; s.style.flexDirection = 'column'; s.style.gap = '12px'; }
+                const b = document.getElementById(`rec-s${n}`); if (b) b.className = 'step' + (n < recStep ? ' done' : n === recStep ? ' active' : '');
+                if (n < 3) { const l = document.getElementById(`rec-l${n}`); if (l) l.className = 'step-line' + (n < recStep ? ' done' : ''); }
+            });
+            document.getElementById('rec-next-btn').style.display = recStep < 3 ? '' : 'none';
+            document.getElementById('rec-validate-btn').style.display = recStep === 3 ? '' : 'none';
+            document.getElementById('rec-back-btn').style.display = recStep > 1 ? '' : 'none';
+            if (recStep === 3) buildRecSummary();
+        }
+        function recNext() {
+            if (recStep === 1 && !document.getElementById('rec-supplier').value.trim()) { toast('Enter supplier name', true); return; }
+            if (recStep === 2 && recItems.length === 0) { toast('Add at least one product', true); return; }
+            recStep++; renderRecStep();
+        }
+        function recBack() { recStep--; renderRecStep(); }
+        function addReceiptItem() {
+            const sel = document.getElementById('rec-prod-sel'), qty = parseInt(document.getElementById('rec-qty').value);
+            if (!sel.value || !qty || qty < 1) { toast('Select product and qty', true); return; }
+            recItems.push({ idx: parseInt(sel.value), name: products[parseInt(sel.value)].name, qty });
+            renderRecItems(); document.getElementById('rec-qty').value = '';
+        }
+        function renderRecItems() {
+            document.getElementById('rec-items').innerHTML = recItems.length === 0 ? '<div style="font-size:10px;color:var(--muted);padding:8px">No items yet</div>' :
+                recItems.map((it, i) => `<div class="pitem-row"><span class="pitem-name">📦 ${it.name}</span><span style="font-size:11px;font-weight:600;color:var(--gold2)">${it.qty} units</span><button class="pitem-remove" onclick="recItems.splice(${i},1);renderRecItems()">×</button></div>`).join('');
+        }
+        function buildRecSummary() {
+            const sup = document.getElementById('rec-supplier').value, wh = document.getElementById('rec-wh').value, dt = document.getElementById('rec-date').value || 'TBD';
+            document.getElementById('rec-summary').innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><div style="font-size:9px;color:var(--muted)">SUPPLIER</div><div style="font-size:10px;font-weight:600">${sup}</div><div style="font-size:9px;color:var(--muted)">WAREHOUSE</div><div style="font-size:10px;font-weight:600">${wh}</div><div style="font-size:9px;color:var(--muted)">ETA</div><div style="font-size:10px;font-weight:600">${dt}</div></div><table class="mtable"><thead><tr><th>Product</th><th>Qty</th><th>Impact</th></tr></thead><tbody>${recItems.map(it => `<tr><td>${it.name}</td><td>${it.qty}</td><td style="color:#5A8A4A;font-weight:600">+${it.qty}</td></tr>`).join('')}</tbody></table>`;
+        }
+        function validateReceipt() {
+            recItems.forEach(it => { products[it.idx].stock += it.qty; });
+            receipts.push({ id: 'REC-' + (1100 + receipts.length), supplier: document.getElementById('rec-supplier').value, items: [...recItems], date: new Date().toLocaleDateString() });
+            closeModal('modal-receipts'); toast(`✓ Receipt validated — ${recItems.length} product(s) stocked`); recItems = []; recStep = 1;
+        }
+
+        // DELIVERY
+        function renderDelStep() {
+            [1, 2, 3].forEach(n => {
+                const s = document.getElementById(`del-step${n}`); if (s) { s.style.display = n === delStep ? 'flex' : 'none'; s.style.flexDirection = 'column'; s.style.gap = '12px'; }
+                const b = document.getElementById(`del-s${n}`); if (b) b.className = 'step' + (n < delStep ? ' done' : n === delStep ? ' active' : '');
+                if (n < 3) { const l = document.getElementById(`del-l${n}`); if (l) l.className = 'step-line' + (n < delStep ? ' done' : ''); }
+            });
+            document.getElementById('del-next-btn').style.display = delStep < 3 ? '' : 'none';
+            document.getElementById('del-validate-btn').style.display = delStep === 3 ? '' : 'none';
+            document.getElementById('del-back-btn').style.display = delStep > 1 ? '' : 'none';
+            if (delStep === 2) buildDelPack(); if (delStep === 3) buildDelSummary();
+        }
+        function delNext() {
+            if (delStep === 1) {
+                if (!document.getElementById('del-customer').value.trim()) { toast('Enter customer name', true); return; }
+                if (delItems.length === 0) { toast('Add at least one product', true); return; }
+                for (const it of delItems) { if (products[it.idx].stock < it.qty) { toast(`Insufficient stock: ${it.name}`, true); return; } }
+            }
+            delStep++; renderDelStep();
+        }
+        function delBack() { delStep--; renderDelStep(); }
+        function addDeliveryItem() {
+            const sel = document.getElementById('del-prod-sel'), qty = parseInt(document.getElementById('del-qty').value);
+            if (!sel.value || !qty || qty < 1) { toast('Select product and qty', true); return; }
+            delItems.push({ idx: parseInt(sel.value), name: products[parseInt(sel.value)].name, qty });
+            renderDelItems(); document.getElementById('del-qty').value = '';
+        }
+        function renderDelItems() {
+            document.getElementById('del-items').innerHTML = delItems.length === 0 ? '<div style="font-size:10px;color:var(--muted);padding:8px">No items yet</div>' :
+                delItems.map((it, i) => `<div class="pitem-row"><span class="pitem-name">📦 ${it.name}</span><span style="font-size:11px;font-weight:600;color:#C05040">${it.qty} units</span><button class="pitem-remove" onclick="delItems.splice(${i},1);renderDelItems()">×</button></div>`).join('');
+        }
+        function buildDelPack() {
+            document.getElementById('del-pack-list').innerHTML = `<table class="mtable"><thead><tr><th>Product</th><th>Pack Qty</th><th>Available</th></tr></thead><tbody>${delItems.map(it => `<tr><td>${it.name}</td><td style="font-weight:600">${it.qty}</td><td style="color:var(--gold2)">${products[it.idx].stock}</td></tr>`).join('')}</tbody></table>`;
+        }
+        function buildDelSummary() {
+            const cust = document.getElementById('del-customer').value, wh = document.getElementById('del-wh').value;
+            document.getElementById('del-summary').innerHTML = `<div style="font-size:9px;color:var(--muted);font-weight:600;margin-bottom:8px">DELIVERY SUMMARY</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><div style="font-size:9px;color:var(--muted)">CUSTOMER</div><div style="font-size:10px;font-weight:600">${cust}</div><div style="font-size:9px;color:var(--muted)">FROM</div><div style="font-size:10px;font-weight:600">${wh}</div></div><table class="mtable"><thead><tr><th>Product</th><th>Qty</th><th>Impact</th></tr></thead><tbody>${delItems.map(it => `<tr><td>${it.name}</td><td>${it.qty}</td><td style="color:#C05040;font-weight:600">−${it.qty}</td></tr>`).join('')}</tbody></table>`;
+        }
+        function validateDelivery() {
+            delItems.forEach(it => { products[it.idx].stock -= it.qty; });
+            deliveries.push({ id: 'DEL-' + (2040 + deliveries.length), customer: document.getElementById('del-customer').value, items: [...delItems], date: new Date().toLocaleDateString() });
+            closeModal('modal-delivery'); toast(`✓ Delivery validated — stock reduced for ${delItems.length} product(s)`); delItems = []; delStep = 1;
+        }
+
+        // INTERNAL TRANSFER
+        function addTransferItem() {
+            const sel = document.getElementById('tr-prod-sel'), qty = parseInt(document.getElementById('tr-qty').value);
+            if (!sel.value || !qty || qty < 1) { toast('Select product and qty', true); return; }
+            trItems.push({ idx: parseInt(sel.value), name: products[parseInt(sel.value)].name, qty });
+            renderTrItems(); document.getElementById('tr-qty').value = '';
+        }
+        function renderTrItems() {
+            document.getElementById('tr-items').innerHTML = trItems.length === 0 ? '<div style="font-size:10px;color:var(--muted);padding:8px">No items yet</div>' :
+                trItems.map((it, i) => `<div class="pitem-row"><span class="pitem-name">📦 ${it.name}</span><span style="font-size:11px;font-weight:600;color:var(--gold2)">${it.qty} units</span><button class="pitem-remove" onclick="trItems.splice(${i},1);renderTrItems()">×</button></div>`).join('');
+        }
+        function validateTransfer() {
+            if (trItems.length === 0) { toast('Add at least one product', true); return; }
+            const from = document.getElementById('tr-from').value, to = document.getElementById('tr-to').value;
+            if (from === to) { toast('Source and destination cannot be the same', true); return; }
+            transfers.push({ id: 'TRF-' + (450 + transfers.length), from, to, items: [...trItems], date: new Date().toLocaleDateString() });
+            closeModal('modal-transfer'); toast(`✓ Transfer logged: ${from} → ${to}`); trItems = [];
+        }
+
+        // STOCK ADJUSTMENT
+        document.addEventListener('change', e => {
+            if (e.target && e.target.id === 'adj-prod') {
+                const idx = parseInt(e.target.value);
+                if (!isNaN(idx)) document.getElementById('adj-recorded').value = products[idx].stock;
+                calcAdjDiff();
+            }
+        });
+        function calcAdjDiff() {
+            const sel = document.getElementById('adj-prod'), counted = document.getElementById('adj-counted').value, box = document.getElementById('adj-diff-box');
+            if (!sel.value || counted === '') { box.style.display = 'none'; return; }
+            const diff = parseInt(counted) - products[parseInt(sel.value)].stock;
+            box.style.display = 'block';
+            if (diff === 0) { box.style.cssText = 'display:block;background:rgba(139,111,46,.08);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:11px;font-weight:600;text-align:center;color:var(--muted)'; box.textContent = 'No change — counts match'; }
+            else if (diff > 0) { box.style.cssText = 'display:block;background:rgba(90,138,74,.1);border:1px solid rgba(90,138,74,.3);border-radius:10px;padding:10px;font-size:11px;font-weight:600;text-align:center;color:#3A6A2A'; box.textContent = `+${diff} units will be added`; }
+            else { box.style.cssText = 'display:block;background:rgba(192,80,64,.08);border:1px solid rgba(192,80,64,.25);border-radius:10px;padding:10px;font-size:11px;font-weight:600;text-align:center;color:#A04030'; box.textContent = `${diff} units will be removed`; }
+        }
+        function applyAdjustment() {
+            const sel = document.getElementById('adj-prod'), counted = document.getElementById('adj-counted').value;
+            if (!sel.value || counted === '') { toast('Select product and enter count', true); return; }
+            const idx = parseInt(sel.value), before = products[idx].stock, after = parseInt(counted);
+            products[idx].stock = after;
+            adjustments.push({ product: products[idx].name, before, after, diff: after - before, reason: document.getElementById('adj-reason').value || '—', date: new Date().toLocaleDateString() });
+            document.getElementById('adj-counted').value = ''; document.getElementById('adj-recorded').value = after;
+            document.getElementById('adj-diff-box').style.display = 'none';
+            renderAdjLog(); toast(`✓ ${products[idx].name} adjusted to ${after} units`);
+        }
+        // MOVE HISTORY
+        let mhView = 'list';
+        // Move history is auto-built from validated receipts, deliveries, transfers
+        function getMoveHistory() {
+            const rows = [];
+            receipts.forEach(r => {
+                r.items.forEach(it => {
+                    rows.push({ ref: r.id, date: r.date, contact: r.supplier, from: 'Vendor', to: r.wh || 'WH-01', qty: it.qty, product: it.name, status: 'Done', type: 'IN' });
+                });
+            });
+            deliveries.forEach(d => {
+                d.items.forEach(it => {
+                    rows.push({ ref: d.id, date: d.date, contact: d.customer, from: d.wh || 'WH-01', to: 'Customer', qty: it.qty, product: it.name, status: 'Done', type: 'OUT' });
+                });
+            });
+            transfers.forEach(t => {
+                t.items.forEach(it => {
+                    rows.push({ ref: t.id, date: t.date, contact: 'Internal', from: t.from, to: t.to, qty: it.qty, product: it.name, status: 'Done', type: 'INT' });
+                });
+            });
+            // seed some demo rows if empty
+            if (!rows.length) {
+                rows.push(
+                    { ref: 'WH/IN/0001', date: '12/1/2024', contact: 'Azure Interior', from: 'Vendor', to: 'WH/Stock1', qty: 50, product: 'Steel Rods 10mm', status: 'Ready', type: 'IN' },
+                    { ref: 'WH/OUT/0001', date: '12/1/2024', contact: 'Azure Interior', from: 'WH/Stock1', to: 'Customer', qty: 10, product: 'Cotton T-Shirt XL', status: 'Ready', type: 'OUT' },
+                    { ref: 'WH/OUT/0002', date: '12/1/2024', contact: 'Azure Interior', from: 'WH/Stock2', to: 'Customer', qty: 5, product: 'Energy Drink 330ml', status: 'Ready', type: 'OUT' },
+                    { ref: 'WH/IN/0002', date: '13/1/2024', contact: 'Raj Suppliers', from: 'Vendor', to: 'WH/Stock1', qty: 100, product: 'LED Bulb 9W Pack', status: 'Done', type: 'IN' },
+                );
+            }
+            return rows;
+        }
+        function setMHView(v) {
+            mhView = v;
+            document.getElementById('mh-list-btn').style.background = v === 'list' ? 'var(--gold)' : 'var(--card)';
+            document.getElementById('mh-list-btn').style.color = v === 'list' ? '#FAF4E8' : 'var(--muted)';
+            document.getElementById('mh-kanban-btn').style.background = v === 'kanban' ? 'var(--gold)' : 'var(--card)';
+            document.getElementById('mh-kanban-btn').style.color = v === 'kanban' ? '#FAF4E8' : 'var(--muted)';
+            document.getElementById('mh-list-view').style.display = v === 'list' ? 'block' : 'none';
+            document.getElementById('mh-kanban-view').style.display = v === 'kanban' ? 'block' : 'none';
+            renderMoveHistory();
+        }
+        function renderMoveHistory() {
+            const q = (document.getElementById('mh-search')?.value || '').toLowerCase();
+            let rows = getMoveHistory().filter(r => !q || r.ref.toLowerCase().includes(q) || r.contact.toLowerCase().includes(q));
+            if (mhView === 'list') {
+                if (!rows.length) { document.getElementById('mh-table-wrap').innerHTML = '<div style="text-align:center;padding:20px;font-size:10px;color:var(--muted)">No moves found</div>'; return; }
+                document.getElementById('mh-table-wrap').innerHTML = `<table class="mtable"><thead><tr>
+      <th>Reference</th><th>Date</th><th>Contact</th><th>Product</th><th>From</th><th>To</th><th>Qty</th><th>Status</th>
+    </tr></thead><tbody>${rows.map(r => {
+                    const isIn = r.type === 'IN';
+                    const isOut = r.type === 'OUT';
+                    const rowColor = isIn ? 'rgba(90,138,74,0.06)' : isOut ? 'rgba(192,80,64,0.06)' : 'rgba(139,111,46,0.04)';
+                    const refColor = isIn ? '#3A6A2A' : isOut ? '#A04030' : 'var(--gold2)';
+                    const badge = r.status === 'Done' ? 'validated' : r.status === 'Ready' ? 'ready' : 'draft';
+                    return `<tr style="background:${rowColor}">
+        <td style="font-weight:700;color:${refColor};font-family:monospace">${r.ref}</td>
+        <td style="color:var(--muted)">${r.date}</td>
+        <td>${r.contact}</td>
+        <td style="font-weight:500">${r.product}</td>
+        <td style="color:var(--muted)">${r.from}</td>
+        <td style="color:var(--muted)">${r.to}</td>
+        <td style="font-weight:700">${r.qty}</td>
+        <td><span class="sbadge ${badge}">${r.status}</span></td>
+      </tr>`;
+                }).join('')}</tbody></table>`;
+            } else {
+                // Kanban by status
+                const statuses = ['Ready', 'Done', 'Draft'];
+                const labels = { Ready: '🟡 Ready', Done: '✅ Done', Draft: '📝 Draft' };
+                document.getElementById('mh-kanban-cols').innerHTML = statuses.map(s => {
+                    const srows = rows.filter(r => r.status === s);
+                    return `<div style="background:var(--card);border-radius:12px;border:1px solid var(--border);padding:12px">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">${labels[s]} <span style="background:var(--bg);border-radius:8px;padding:1px 6px">${srows.length}</span></div>
+        ${srows.length === 0 ? '<div style="font-size:10px;color:var(--muted);text-align:center;padding:12px">Empty</div>' :
+                            srows.map(r => {
+                                const isIn = r.type === 'IN', isOut = r.type === 'OUT';
+                                const bc = isIn ? 'rgba(90,138,74,0.12)' : isOut ? 'rgba(192,80,64,0.1)' : 'rgba(139,111,46,0.08)';
+                                const tc = isIn ? '#3A6A2A' : isOut ? '#A04030' : 'var(--gold)';
+                                return `<div style="background:${bc};border-radius:9px;padding:9px 11px;margin-bottom:7px;border:1px solid ${isIn ? 'rgba(90,138,74,0.2)' : isOut ? 'rgba(192,80,64,0.18)' : 'var(--border)'}">
+            <div style="font-size:10px;font-weight:700;color:${tc};font-family:monospace">${r.ref}</div>
+            <div style="font-size:9px;color:var(--dark);font-weight:500;margin-top:3px">${r.product}</div>
+            <div style="font-size:8.5px;color:var(--muted);margin-top:3px">${r.from} → ${r.to}</div>
+            <div style="display:flex;justify-content:space-between;margin-top:5px">
+              <span style="font-size:8.5px;color:var(--muted)">${r.contact}</span>
+              <span style="font-size:8.5px;font-weight:700;color:var(--dark)">${r.qty} units</span>
+            </div>
+          </div>`;
+                            }).join('')}
+      </div>`;
+                }).join('');
+            }
+        }
+        function renderAdjLog() {
+            const el = document.getElementById('adj-log'); if (!el) return;
+            if (!adjustments.length) { el.innerHTML = '<div style="font-size:10px;color:var(--muted);padding:6px">No adjustments yet</div>'; return; }
+            el.innerHTML = `<table class="mtable"><thead><tr><th>Product</th><th>Before</th><th>After</th><th>Diff</th><th>Reason</th></tr></thead><tbody>${adjustments.slice().reverse().map(a => `<tr><td>${a.product}</td><td>${a.before}</td><td style="font-weight:700">${a.after}</td><td style="color:${a.diff >= 0 ? '#5A8A4A' : '#C05040'};font-weight:700">${a.diff > 0 ? '+' : ''}${a.diff}</td><td style="color:var(--muted)">${a.reason}</td></tr>`).join('')}</tbody></table>`;
+        }</script>
+</body>
+
+</html>
